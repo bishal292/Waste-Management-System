@@ -13,7 +13,7 @@ import { useAppStore } from "@/store/store";
 
 export const Auth = () => {
   const navigate = useNavigate();
-  const { userInfo, setUserInfo } = useAppStore();
+  const { setUserInfo } = useAppStore();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +73,7 @@ export const Auth = () => {
         );
         if (res.status === 200) {
           toast.success("Login Successful");
-          setUserInfo(res.data.user);
+          setUserInfo(res.data);
           navigate("/home");
         }
       }

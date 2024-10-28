@@ -15,3 +15,6 @@ export const CREATE_REPORT_ROUTE = `${REPORT_ROUTE}/create-report`;
 
 const COLLECT_WASTE = '/api/get-report';
 export const COLLECT_WASTE_ROUTE = `${COLLECT_WASTE}/collect-waste`;
+
+
+export const IMPACT_DATA_ROUTE = "/api/impact-data"

@@ -30,6 +30,8 @@ export const signup = async (req, res) => {
     });
 
     res.status(201).json({
+      notification: [],
+      totalBalance,
       user: {
         email: user.email,
         id: user._id,
@@ -70,13 +72,16 @@ export const login = async (req, res) => {
       maxAge,
     });
 
+    const notification = await Notifications.find({ userId: req.userId , ifRead: false });
+    const transaction = await Transaction.find({ userId: req.userId});
+    const totalBalance = transaction.reduce((acc, transaction) => acc + transaction.amount, 0);
+
     res.status(200).json({
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-      },
+      user: { id: user._id, email: user.email, name: user.name },
+      notification: Array.from(notification),
+      totalBalance,
     });
+
   } catch (error) {
     console.log(error);
     return res.status(500).send("Internal Server Error");

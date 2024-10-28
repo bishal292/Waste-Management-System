@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './Routes/AuthRoutes.js';
 import userRouter from './Routes/UserRoutes.js';
+import { impactController } from './controllers/ImpactController.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cors({
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 
+app.get("/api/impact-data", impactController);
 
 
 app.get("/",(req, res, next) => {

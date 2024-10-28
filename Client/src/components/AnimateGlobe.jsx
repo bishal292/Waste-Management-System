@@ -1,3 +1,5 @@
+import { Leaf } from "lucide-react";
+
 function AnimatedGlobe() {
     return (
       <div className="relative w-32 h-32 mx-auto mb-8">

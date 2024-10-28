@@ -7,5 +7,5 @@ const authRouter = Router();
 authRouter.post("/sign-up", signup );
 authRouter.post("/login", login);
 authRouter.get("/user-info", verifyToken ,getUserInfo );
-authRouter.get("/logout", logOut);
+authRouter.get("/logout",verifyToken, logOut);
 export default authRouter;
