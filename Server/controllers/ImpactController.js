@@ -1,13 +1,30 @@
 import { Report, Rewards } from "../db/Schemas.js";
 
-export const impactController = async (req,res) => {
+export const impactController = async (req, res) => {
   try {
     // Count the total number of reports
     const totalReports = await Report.countDocuments();
 
     // Sum the total amount of waste collected from the CollectedWaste collection
     const totalWasteData = await Report.aggregate([
-      { $group: { _id: null, totalWaste: { $sum: { $toDouble: "$amount" } } } },
+      {
+        $addFields: {
+          numericAmount: {
+           $convert: {
+              input: { $trim: { input: "$amount", chars: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " } },
+              to: "double",
+              onError: 0,
+              onNull: 0
+            }
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalWaste: { $sum: "$numericAmount" },
+        },
+      },
     ]);
     const totalWasteCollected = totalWasteData[0]?.totalWaste || 0;
 
@@ -16,8 +33,7 @@ export const impactController = async (req,res) => {
       { $group: { _id: null, totalTokens: { $sum: "$points" } } },
     ]);
     const totalTokensEarned = totalTokensData[0]?.totalTokens || 0;
-    const co2Offset = totalWasteCollected * 0.5;  // Assuming 0.5 kg CO2 offset per kg of waste
-
+    const co2Offset = totalWasteCollected * 0.5; // Assuming 0.5 kg CO2 offset per kg of waste
 
     // Send the aggregated data as response
     res.status(200).json({

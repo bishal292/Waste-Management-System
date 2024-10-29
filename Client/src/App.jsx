@@ -14,6 +14,8 @@ import Reward from "./pages/Reward";
 import Report from "./pages/Report";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
+import LeaderBoard from "./pages/LeaderBoards";
+import Settings from "./pages/Settings";
 
 // Private Route Wrapper
 const PrivateRoutes = ({ children }) => {
@@ -78,11 +80,31 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/reward",
+    path: "/rewards",
     element: (
       <PrivateRoutes>
         <HeaderSidebarLayout>
           <Reward />
+        </HeaderSidebarLayout>
+      </PrivateRoutes>
+    ),
+  },
+  {
+    path: "/leaderboard",
+    element: (
+      <PrivateRoutes>
+        <HeaderSidebarLayout>
+          <LeaderBoard />
+        </HeaderSidebarLayout>
+      </PrivateRoutes>
+    ),
+  },
+  {
+    path: "/settings",
+    element: (
+      <PrivateRoutes>
+        <HeaderSidebarLayout>
+          <Settings />
         </HeaderSidebarLayout>
       </PrivateRoutes>
     ),
