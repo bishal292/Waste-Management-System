@@ -1,9 +1,13 @@
-import React, { useState } from "react";
-import { useAppStore } from "@/store/store";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Loader, MapPin, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CREATE_REPORT_ROUTE, Gemini_Api_key, Location_Api } from "@/utils/constant";
+import {
+  CREATE_REPORT_ROUTE,
+  Gemini_Api_key,
+  GET_REPORT_ROUTE,
+  Location_Api,
+} from "@/utils/constant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { apiClient } from "@/lib/api-client";
 
@@ -28,7 +32,37 @@ const Report = () => {
     },
   ]);
 
-  async function  handleSubmit(e) {
+  const fetchReports = async () => {
+    try {
+      console.log("Fetch reports is called");
+      const response = await apiClient.get(GET_REPORT_ROUTE, {
+        withCredentials: true,
+        // params: {
+        //   skip: reports[0].id ? reports.length : 0,
+        //   limit: 10,
+        // },
+      });
+      if (response.data) {
+        console.log(response.data);
+        const formattedFetchedReports = response.data.map((report) => ({
+          id: report._id,
+          location: report.location,
+          wasteType: report.wasteType,
+          amount: report.amount,
+          createdAt: report.createdAt.split("T")[0],
+        }));
+        console.log(formattedFetchedReports);
+        setReports(formattedFetchedReports);
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    console.log("Fetching reports...");
+    fetchReports();
+  }, []);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     if (verificationStatus !== "success") {
       toast.error("Please verify the waste before submitting the report.");
@@ -40,11 +74,14 @@ const Report = () => {
       const createdReport = {
         ...newReport,
         imageUrl: preview,
-        verificationResult
+        verificationResult,
       };
-      const response = await apiClient.post(CREATE_REPORT_ROUTE,{report:createdReport},{withCredentials:true});
-      console.log("Response for report submit : ",response);
-      if(response.status === 201){
+      const response = await apiClient.post(
+        CREATE_REPORT_ROUTE,
+        { report: createdReport },
+        { withCredentials: true }
+      );
+      if (response.status === 201) {
         const report = response.data;
         toast.success("Report submitted successfully");
         const formattedReport = {
@@ -52,13 +89,10 @@ const Report = () => {
           location: report.location,
           wasteType: report.wasteType,
           amount: report.amount,
-          createdAt: report.createdAt.split('T')[0]
+          createdAt: report.createdAt.split("T")[0],
         };
 
-        console.log("Formatted Report : ",formattedReport);
-        
         setReports([formattedReport, ...reports]);
-
 
         setNewReport({
           location: "",
@@ -143,7 +177,6 @@ const Report = () => {
       const response = result.response;
       const text = response.text();
       const parsedResult = JSON.parse(text);
-      console.log("Parsed Response : ",parsedResult);
 
       try {
         if (parsedResult.message === "Not a waste") {
