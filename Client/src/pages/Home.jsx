@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Coins, Leaf, MapPin, Recycle, Users } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { IMPACT_DATA_ROUTE } from "@/utils/constant";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function ImpactCard({ title, value, icon: Icon }) {
   const formattedValue =
@@ -41,9 +43,16 @@ export default function Home() {
     tokensEarned: 0,
     co2Offset: 0,
   });
+  const {userInfo } = useAppStore();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
-
+    if (userInfo) {
+      setLoggedIn(true);
+    }else{
+      setLoggedIn(false);
+    }
     async function fetchImpactData() {
       try {
         const response = await apiClient.get(IMPACT_DATA_ROUTE);
@@ -59,11 +68,12 @@ export default function Home() {
   }, []);
 
   const login = () => {
-    const userInfo = useAppStore();
     if (userInfo) {
       setLoggedIn(true);
+    }else{
+      navigate("/auth");
+      setLoggedIn(false);
     }
-    setLoggedIn(false);
   };
 
   return (
@@ -86,7 +96,7 @@ export default function Home() {
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         ) : (
-          <Link href="/report">
+          <Link to="/report">
             <Button className="bg-green-600 hover:bg-green-700 text-white text-lg py-6 px-10 rounded-full font-medium transition-all duration-300 ease-in-out transform hover:scale-105">
               Report Waste
               <ArrowRight className="ml-2 h-5 w-5" />

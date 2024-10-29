@@ -18,3 +18,7 @@ export const COLLECT_WASTE_ROUTE = `${COLLECT_WASTE}/collect-waste`;
 
 
 export const IMPACT_DATA_ROUTE = "/api/impact-data"
+
+export const Gemini_Api_key = import.meta.env.VITE_GEMINI_API_KEY;
+export const Location_Api = import.meta.env.VITE_LOCATION_API;
+// export const location_list_Api =`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5`

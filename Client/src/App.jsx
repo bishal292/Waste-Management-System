@@ -11,7 +11,7 @@ import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Collect from "./pages/collect";
 import Reward from "./pages/Reward";
-import Report from "./pages/report";
+import Report from "./pages/Report";
 import Header from "./components/Header";
 import SideBar from "./components/SideBar";
 
