@@ -14,7 +14,6 @@ userSchema.pre("save", async function (next) {
 })
 
 const reportsSchema = mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Primary Key
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   location: { type: String, required: true },
   wasteType: { type: String, required: true, maxlength: 255 },
@@ -27,7 +26,6 @@ const reportsSchema = mongoose.Schema({
 });
 
 const rewardSchema = mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Primary Key
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   points: { type: Number, default: 0, required: true },
   createdAt: { type: Date, default: Date.now, required: true },
@@ -39,7 +37,6 @@ const rewardSchema = mongoose.Schema({
 });
 
 const collectedWasteSchema = mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Primary Key
   reportId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Report",
@@ -55,7 +52,6 @@ const collectedWasteSchema = mongoose.Schema({
 });
 
 const notificationSchema = mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Primary Key
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   message: { type: String, required: true },
   type: { type: String, required: true, maxlength: 50 },
@@ -64,7 +60,6 @@ const notificationSchema = mongoose.Schema({
 });
 
 const TransactionSchema = mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId, // Primary Key
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   type: { type: String, required: true, maxlength: 20 },
   amount: { type: Number, required: true },

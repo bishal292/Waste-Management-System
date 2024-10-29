@@ -1,4 +1,4 @@
-import { Report } from "../db/Schemas";
+import { Report } from "../db/Schemas.js";
 
 
 export const createReport = async (req,res) => { 
@@ -9,20 +9,20 @@ export const createReport = async (req,res) => {
         }
         if(!req.body.report) return res.status(400).send("Report is required");
 
-        const {location, wasteType, amount, imageUrl, collectorId } = req.body.report;
-
-        if(!location || !wasteType || !amount) return res.status(400).send("All fields are required");
+        const {location, type, amount, imageUrl , verificationResult } = req.body.report;
+        if(!location || !type || !amount || !verificationResult) return res.status(400).send("All fields are required");
         const newReport = await Report.create({
             userId,
             location,
-            wasteType,
+            wasteType:type,
             amount,
             imageUrl,
-            collectorId
+            verificationResult
         })
         res.status(201).json(newReport);
     } catch (error) {
-        
+        res.status(500).send("Internal Server Error");
+        console.log("Some Error Occured", error);
     }
 }
 

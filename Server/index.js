@@ -6,6 +6,7 @@ import cors from 'cors';
 import authRouter from './Routes/AuthRoutes.js';
 import userRouter from './Routes/UserRoutes.js';
 import { impactController } from './controllers/ImpactController.js';
+import reportRouter from './Routes/ReportRoutes.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cors({
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/report", reportRouter);
 
 app.get("/api/impact-data", impactController);
 

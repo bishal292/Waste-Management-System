@@ -3,11 +3,11 @@ import { useAppStore } from "@/store/store";
 import { toast } from "sonner";
 import { CheckCircle, Loader, MapPin, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Gemini_Api_key, Location_Api } from "@/utils/constant";
+import { CREATE_REPORT_ROUTE, Gemini_Api_key, Location_Api } from "@/utils/constant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { apiClient } from "@/lib/api-client";
 
 const Report = () => {
-  const { userInfo } = useAppStore();
   const [preview, setPreview] = useState("");
   const [file, setFile] = useState("");
   const [newReport, setNewReport] = useState({
@@ -28,13 +28,54 @@ const Report = () => {
     },
   ]);
 
-  if (!userInfo) {
-    toast.error("You are not authenticated. Please login to access this page.");
-  }
-
-  function handleSubmit(e) {
+  async function  handleSubmit(e) {
     e.preventDefault();
-    console.log("Report Submitted");
+    if (verificationStatus !== "success") {
+      toast.error("Please verify the waste before submitting the report.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const createdReport = {
+        ...newReport,
+        imageUrl: preview,
+        verificationResult
+      };
+      const response = await apiClient.post(CREATE_REPORT_ROUTE,{report:createdReport},{withCredentials:true});
+      console.log("Response for report submit : ",response);
+      if(response.status === 201){
+        const report = response.data;
+        toast.success("Report submitted successfully");
+        const formattedReport = {
+          id: report._id,
+          location: report.location,
+          wasteType: report.wasteType,
+          amount: report.amount,
+          createdAt: report.createdAt.split('T')[0]
+        };
+
+        console.log("Formatted Report : ",formattedReport);
+        
+        setReports([formattedReport, ...reports]);
+
+
+        setNewReport({
+          location: "",
+          type: "",
+          amount: "",
+        });
+        setPreview("");
+        setFile("");
+        setVerificationStatus("");
+        setVerificationResult("");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error("Failed to submit report:", error);
+      toast.error("Failed to submit report. Please try again later.");
+    }
   }
 
   function handleFileChange(e) {
@@ -90,21 +131,19 @@ const Report = () => {
           "quantity": "estimated quantity with unit",
           "confidence": confidence level as a number between 0 and 1
         }
-        if it cannot be considered as any type of waste then provide the response like this:
+        if the image cannot be considered as any type of waste or cannot be converted into any waste in future then provide the response like this:
         {
           "message": "Not a waste"
-        }  
-        
+        }
+
         `;
 
       const result = await model.generateContent([prompt, ...imageParts]);
 
-      console.log(result);
       const response = result.response;
-      console.log(response);
       const text = response.text();
       const parsedResult = JSON.parse(text);
-      console.log(parsedResult);
+      console.log("Parsed Response : ",parsedResult);
 
       try {
         if (parsedResult.message === "Not a waste") {
@@ -315,7 +354,7 @@ const Report = () => {
         <h2 className="text-3xl font-semibold mb-6 text-gray-800">
           Recent Reports
         </h2>
-        {reports[0].id !== '' ? (
+        {reports[0].id !== "" ? (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="max-h-96 overflow-y-auto">
               <table className="w-full">
@@ -363,7 +402,11 @@ const Report = () => {
               </table>
             </div>
           </div>
-        ):(<p className="text-gray-500 text-center">You have not reported any Waste Yet </p>)}
+        ) : (
+          <p className="text-gray-500 text-center">
+            You have not reported any Waste Yet{" "}
+          </p>
+        )}
       </div>
     </>
   );
