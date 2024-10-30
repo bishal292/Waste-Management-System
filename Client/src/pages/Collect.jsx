@@ -11,7 +11,7 @@ import {
   Upload,
   Weight,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/store";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -48,6 +48,7 @@ const Collect = () => {
   const [loading, setLoading] = useState(true);
   const [hoveredWasteType, setHoveredWasteType] = useState(null);
   const [reports, setReports] = useState([]);
+  const [paginatedReports, setPaginatedReports] = useState([]);
   const [totalReports, setTotalReports] = useState(0);
   const [selectedTask, setSelectedTask] = useState(null);
   const [verificationImage, setVerificationImage] = useState(null);
@@ -60,8 +61,11 @@ const Collect = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageCount = Math.ceil(totalReports / 5);
   const user = userInfo.user;
+  const isFirstRender = useRef(true);
+
 
   const fetchReports = async ({ skip, limit }) => {
+    if (reports.length === totalReports && totalReports>0) return;
     try {
       const response = await apiClient.get(GET_REPORTS_TO_COLLECT, {
         withCredentials: true,
@@ -80,7 +84,10 @@ const Collect = () => {
           status: report.status,
           collectorId: report.collectorId,
         }));
-        setReports(formattedFetchedReports);
+        setReports((prevReports) => [
+          ...prevReports,
+          ...formattedFetchedReports,
+        ]);
       }
       console.log(response);
     } catch (error) {
@@ -90,10 +97,21 @@ const Collect = () => {
 
   useEffect(() => {
     // fetch reports data along with total reports count
-    fetchReports({ skip: (currentPage*5 -5) , limit: 5 });
+    fetchReports({ skip: currentPage * 5 - 5, limit: 5 });
     setLoading(false);
+    isFirstRender.current = false
   }, []);
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * 5;
+    const endIndex = startIndex + 5 > reports.length ? reports.length : startIndex + 5;
+    setPaginatedReports(reports.slice(startIndex, endIndex));
+  }, [currentPage, reports]);
 
+  // As the next page is available and next button is clicked fetch next 5 reports data and append it to reports
+  const handleNextPageClick = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, pageCount));
+    fetchReports({ skip: currentPage * 5, limit: 5 });
+  };
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       const response = await apiClient.patch(
@@ -109,7 +127,6 @@ const Collect = () => {
             task.id === taskId ? { ...task, ...updatedReport } : task
           )
         );
-
       }
       console.log(response);
 
@@ -280,7 +297,7 @@ const Collect = () => {
       ) : (
         <>
           <div className="space-y-4">
-            {reports.map((task) => (
+            {paginatedReports.map((task) => (
               <div
                 key={task.id}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
@@ -333,9 +350,7 @@ const Collect = () => {
                     task.collectorId === user?.id && (
                       <>
                         <Button
-                          onClick={() =>
-                            handleStatusChange(task.id, "Pending")
-                          }
+                          onClick={() => handleStatusChange(task.id, "Pending")}
                           variant="outline"
                           size="sm"
                         >
@@ -379,9 +394,7 @@ const Collect = () => {
               Page {currentPage} of {pageCount}
             </span>
             <Button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, pageCount))
-              }
+              onClick={handleNextPageClick}
               disabled={currentPage === pageCount}
               className="ml-2"
             >
