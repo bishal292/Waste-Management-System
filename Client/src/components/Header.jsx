@@ -11,7 +11,6 @@ import {
   Menu,
   Coins,
   Leaf,
-  Search,
   Bell,
   LogOut,
   LogIn,
@@ -28,7 +27,6 @@ const Header = ({ onMenuClick }) => {
   const [balance, setBalance] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const { userInfo, setUserInfo } = useAppStore();
-  const isMobile = window.innerWidth < 768;
 
   const login = ()=>{
     navigate("/auth")

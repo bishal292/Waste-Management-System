@@ -11,7 +11,8 @@ export const LOGOUT_ROUTE = `${AUTH_ROUTE}/logout`;
 const REPORT_ROUTE = "/api/report";
 export const GET_REPORT_ROUTE = `${REPORT_ROUTE}/get-recent-report`;
 export const CREATE_REPORT_ROUTE = `${REPORT_ROUTE}/create-report`;
-
+export const GET_REPORTS_TO_COLLECT = `${REPORT_ROUTE}/get-reports`
+export const UPDATE_REPORT_STATUS = `${REPORT_ROUTE}/update-report`
 
 const COLLECT_WASTE = '/api/get-report';
 export const COLLECT_WASTE_ROUTE = `${COLLECT_WASTE}/collect-waste`;

@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
 userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 })
 
 const reportsSchema = mongoose.Schema({
@@ -21,7 +22,7 @@ const reportsSchema = mongoose.Schema({
   imageUrl: { type: String },
   verificationResult: { type: Object }, // JSON object
   status: { type: String, required: true, default: "Pending", maxlength: 255 },
-  createdAt: { type: Date, default: Date.now, required: true },
+  createdAt: { type: Date, default: Date.now, required: true, get: (v) => v instanceof Date ? v : new Date(v) },
   collectorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 

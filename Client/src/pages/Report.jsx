@@ -73,7 +73,7 @@ const Report = () => {
     try {
       const createdReport = {
         ...newReport,
-        imageUrl: preview,
+        // imageUrl: preview,
         verificationResult,
       };
       const response = await apiClient.post(
