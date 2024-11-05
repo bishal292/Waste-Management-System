@@ -17,10 +17,12 @@ import { apiClient } from "@/lib/api-client";
 import {
   Gemini_Api_key,
   GET_REPORTS_TO_COLLECT,
+  SET_REWARD_ROUTE,
   UPDATE_REPORT_STATUS,
 } from "@/utils/constant";
 import { toast } from "sonner";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createRewardPoints } from "@/utils/utility-Function";
 
 // Utility function component to Style Status Badge for Reports.
 function StatusBadge({ status }) {
@@ -28,7 +30,7 @@ function StatusBadge({ status }) {
     Pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
     in_progress: { color: "bg-blue-100 text-blue-800", icon: Trash2 },
     completed: { color: "bg-green-100 text-green-800", icon: CheckCircle },
-    verified: { color: "bg-purple-100 text-purple-800", icon: CheckCircle },
+    Collected: { color: "bg-purple-100 text-purple-800", icon: CheckCircle },
   };
   const { color, icon: Icon } = statusConfig[status];
 
@@ -63,9 +65,8 @@ const Collect = () => {
   const user = userInfo.user;
   const isFirstRender = useRef(true);
 
-
   const fetchReports = async ({ skip, limit }) => {
-    if (reports.length === totalReports && totalReports>0) return;
+    if (reports.length === totalReports && totalReports > 0) return;
     try {
       const response = await apiClient.get(GET_REPORTS_TO_COLLECT, {
         withCredentials: true,
@@ -99,11 +100,12 @@ const Collect = () => {
     // fetch reports data along with total reports count
     fetchReports({ skip: currentPage * 5 - 5, limit: 5 });
     setLoading(false);
-    isFirstRender.current = false
+    isFirstRender.current = false;
   }, []);
   useEffect(() => {
     const startIndex = (currentPage - 1) * 5;
-    const endIndex = startIndex + 5 > reports.length ? reports.length : startIndex + 5;
+    const endIndex =
+      startIndex + 5 > reports.length ? reports.length : startIndex + 5;
     setPaginatedReports(reports.slice(startIndex, endIndex));
   }, [currentPage, reports]);
 
@@ -177,7 +179,7 @@ const Collect = () => {
 
       const prompt = `You are an expert in waste management and recycling. Analyze this image and provide:
       1. Confirm if the waste type matches it is required to be same: ${selectedTask.wasteType}
-      2. Estimate if the quantity matches it is not exact same then it can be okay: ${selectedTask.amount}
+      2. Estimate if the quantity matches, igonre some minor difference with compared to: ${selectedTask.amount}
       3. Your confidence level in this assessment (as a percentage)
       
       Respond in JSON format exact like this without any changes:
@@ -188,45 +190,14 @@ const Collect = () => {
       }
       `;
 
-      // const prompt =`You are an expert in waste management and recycling. Analyze this image and keep in your mind the following:
-      //   1. The type of waste (e.g., plastic, paper, glass, metal, organic)
-      //   2. An estimate of the quantity or amount (in kg or liters)
-      //   3. Your confidence level in this assessment (as a percentage)
-
-      //   Note: Don't respond this below json format, just keep in your mind and respond in the next json format.
-      //   {
-      //     "wasteType": "type of waste",
-      //     "quantity": "estimated quantity with unit",
-      //     "confidence": confidence level as a number between 0 and 1
-      //   }
-      //   if the image cannot be considered as any type of waste or cannot be converted into any waste in future then provide the response like this:
-      //   {
-      //     "message": "Not a waste"
-      //   }
-      //   else compare the data in your mind with below data:
-      //   {
-      //   "wasteType": "${selectedTask.wasteType}",
-      //   "quantity": "${selectedTask.amount}",
-      //   }
-      //   4. and then respond like this:
-      //   {
-      //     "wasteTypeMatch": true/false,
-      //     "quantityMatch": true/false,
-      //     "confidence": confidence level as a number between 0 and 1
-      //   }
-      //   `
-
       const result = await model.generateContent([prompt, ...imageParts]);
       const text = result.response.text();
       console.log("Response from Gemini AI:", text);
 
       try {
         const parsedResult = JSON.parse(text);
-        setVerificationResult({
-          wasteTypeMatch: parsedResult.wasteTypeMatch,
-          quantityMatch: parsedResult.quantityMatch,
-          confidence: parsedResult.confidence,
-        });
+        console.log("Parsed result:", parsedResult);
+        setVerificationResult({...parsedResult});
         setVerificationStatus("success");
 
         if (
@@ -234,27 +205,49 @@ const Collect = () => {
           parsedResult.quantityMatch &&
           parsedResult.confidence > 0.6
         ) {
-          await handleStatusChange(selectedTask.id, "verified");
-          const earnedReward = Math.floor(Math.random() * 50) + 10; // Random reward between 10 and 59
 
-          // Save the reward
-
-          // Save the collected waste
-
-          // set reward to user
-
-          toast.success(
-            `Verification successful! You earned ${earnedReward} tokens!`,
-            {
-              duration: 5000,
-              position: "top-center",
-            }
+          const response = await apiClient.patch(
+            UPDATE_REPORT_STATUS,
+            { reportId: selectedTask.id, status: "Collected" },
+            { withCredentials: true }
           );
+          if (response.status === 200 && response.data) {
+            const points = createRewardPoints(parseInt(selectedTask.amount),20,50); //For collection reward point ranges between 20 -50 based on waste collection.
+            const rewardresponse = await apiClient.post(
+                SET_REWARD_ROUTE,
+                { points, name: "collect" },
+                { withCredentials: true }
+              );
+            if (rewardresponse.status === 201) {
+              toast.success(`Verification successful! You earned ${points} reward points!`);
+            } else {
+              toast.error(" Verification success but Failed to save reward points.");
+            }
+            const newUpdatedReport = response.data;
+            newUpdatedReport.date = newUpdatedReport.date.split("T")[0];
+            setReports((prev) =>
+              prev.map((task) =>
+                task.id === selectedTask.id ? { ...task, ...newUpdatedReport } : task
+              )
+            );
+            setVerificationStatus("idle");
+            setSelectedTask(null);
+            verificationImage(null);
+          } else {
+            toast.error(
+              "Internal Server Error. Failed to update task status.",
+              {
+                duration: 1000,
+                position: "top-center",
+              }
+            );
+          }
+
         } else {
           toast.error(
             "Verification failed. The collected waste does not match the reported waste.",
             {
-              duration: 5000,
+              duration: 1000,
               position: "top-center",
             }
           );
@@ -448,7 +441,7 @@ const Collect = () => {
               <img
                 src={verificationImage}
                 alt="Verification"
-                className="mb-4 rounded-md w-full"
+                className="mb-4 rounded-md max-w-[300px] h-[271px]"
               />
             )}
             <Button

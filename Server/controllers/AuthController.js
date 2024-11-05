@@ -1,6 +1,7 @@
-import { Notifications, Transaction, User } from "../db/Schemas.js";
+import { Notifications, Rewards, Transaction, User } from "../db/Schemas.js";
 import jwt from "jsonwebtoken";
 import { compare } from "bcrypt";
+import mongoose from "mongoose";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds.
 
@@ -72,16 +73,21 @@ export const login = async (req, res) => {
       maxAge,
     });
 
-    const notification = await Notifications.find({ userId: req.userId , ifRead: false });
-    const transaction = await Transaction.find({ userId: req.userId});
-    const totalBalance = transaction.reduce((acc, transaction) => acc + transaction.amount, 0);
+    const notification = await Notifications.find({
+      userId: req.userId,
+      ifRead: false,
+    });
+    const transaction = await Transaction.find({ userId: req.userId });
+    const totalBalance = transaction.reduce(
+      (acc, transaction) => acc + transaction.amount,
+      0
+    );
 
     res.status(200).json({
       user: { id: user._id, email: user.email, name: user.name },
       notification: Array.from(notification),
       totalBalance,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).send("Internal Server Error");
@@ -90,18 +96,24 @@ export const login = async (req, res) => {
 
 export const getUserInfo = async (req, res) => {
   try {
-    const userData = await User.findById(req.userId);
+    const userId = req.userId;
+    if (!userId) return res.status(401).send("You are not Authenticated");
 
-    if (!userData) return res.status(404).send("User not found");
+    const userData = await User.findById(userId);
+    if (!userData) return res.status(404).send("User Not Found");
 
-    const notification = await Notifications.find({ userId: req.userId , ifRead: false });
-    const transaction = await Transaction.find({ userId: req.userId});
-    const totalBalance = transaction.reduce((acc, transaction) => acc + transaction.amount, 0);
+    const unreadNotification = await Notifications.find({
+      userId,
+      isRead: false,
+    });
 
+    const rewards = await Rewards.find({ userId, isAvailable: true });
+    const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
     res.status(200).json({
       user: { id: userData._id, email: userData.email, name: userData.name },
-      notification: Array.from(notification),
-      totalBalance,
+      // notification: Array.from(notification),
+      notification: unreadNotification,
+      totalBalance: totalPoints,
     });
   } catch (error) {
     console.log(error);
@@ -110,11 +122,11 @@ export const getUserInfo = async (req, res) => {
 };
 
 export const logOut = async (req, res) => {
-    try {
-      res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: true });
-      res.status(200).send("Logged Out Successfully");
-    } catch (error) {
-      console.log(error);
-      return res.status(500).send("Internal Server Error");
-    }
-  };
+  try {
+    res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: true });
+    res.status(200).send("Logged Out Successfully");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Internal Server Error");
+  }
+};

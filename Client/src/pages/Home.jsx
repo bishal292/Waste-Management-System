@@ -48,7 +48,6 @@ export default function Home() {
 
 
   useEffect(() => {
-    console.log("Home page useffect")
     if (userInfo) {
       setLoggedIn(true);
     }else{
@@ -56,9 +55,7 @@ export default function Home() {
     }
     async function fetchImpactData() {
       try {
-        console.log("Fetching impact data");
         const response = await apiClient.get(IMPACT_DATA_ROUTE,{withCredentials:true});
-        console.log(response)
         setImpactData(response.data);
 
       } catch (error) {

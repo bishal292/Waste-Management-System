@@ -10,6 +10,8 @@ import {
 } from "@/utils/constant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { apiClient } from "@/lib/api-client";
+import { createRewardPoints } from "@/utils/utility-Function";
+import Reward from "./Reward";
 
 const Report = () => {
   const [preview, setPreview] = useState("");
@@ -22,15 +24,7 @@ const Report = () => {
   const [verificationStatus, setVerificationStatus] = useState();
   const [verificationResult, setVerificationResult] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [reports, setReports] = useState([
-    {
-      id: "",
-      location: "",
-      wasteType: "",
-      amount: "",
-      createdAt: "",
-    },
-  ]);
+  const [reports, setReports] = useState([]);
 
   const fetchReports = async () => {
     try {
@@ -76,9 +70,15 @@ const Report = () => {
         // imageUrl: preview,
         verificationResult,
       };
+
+      // Create reward for reporting waste
+      const points = createRewardPoints(parseInt(verificationResult.quantity.match(/\d+/)[0]) , 10 , 20);
+      console.log("Points : ",points," Quantity : ",verificationResult.quantity);
       const response = await apiClient.post(
         CREATE_REPORT_ROUTE,
-        { report: createdReport },
+        { report: createdReport,
+          reward: { points:points,name:"report"}
+         },
         { withCredentials: true }
       );
       if (response.status === 201) {
@@ -387,7 +387,7 @@ const Report = () => {
         <h2 className="text-3xl font-semibold mb-6 text-gray-800">
           Recent Reports
         </h2>
-        {reports[0].id !== "" ? (
+        {reports.length > 0 && reports[0].id ? (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="max-h-96 overflow-y-auto">
               <table className="w-full">
@@ -417,10 +417,10 @@ const Report = () => {
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
-                            {report.location}
+                            {report.location.length>15 ? (report.location.slice(0,15)+"...") : report.location}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {report.wasteType}
+                            {report.wasteType.length > 15 ?( report.wasteType.slice(0,15)+"...") : report.wasteType}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {report.amount}

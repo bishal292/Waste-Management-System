@@ -5,8 +5,14 @@ export const impactController = async (req, res) => {
     // Count the total number of reports
     const totalReports = await Report.countDocuments();
 
-    // Sum the total amount of waste collected from the CollectedWaste collection
+    // Sum the total amount of waste collected from the Report collection where status is verified and there is collector id present.
     const totalWasteData = await Report.aggregate([
+      {
+        $match: {
+          status: "verified"||"Verified"||"VERIFIED",
+          collectorId: { $exists: true, $ne: null }
+        },
+      },
       {
         $addFields: {
           numericAmount: {

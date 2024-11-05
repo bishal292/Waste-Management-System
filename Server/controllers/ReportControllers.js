@@ -1,4 +1,4 @@
-import { Report } from "../db/Schemas.js";
+import { Report, Notifications, Rewards, Transaction } from "../db/Schemas.js";
 
 export const createReport = async (req, res) => {
   try {
@@ -6,11 +6,12 @@ export const createReport = async (req, res) => {
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
     }
-    if (!req.body.report) return res.status(400).send("Report is required");
-
-    const { location, type, amount, imageUrl, verificationResult } =
-      req.body.report;
-    if (!location || !type || !amount || !verificationResult)
+    console.log(req.body);
+    const { report, reward } = req.body;
+    if (!report || !reward ) return res.status(400).send("All fields are required");
+    const { location, type, amount, imageUrl, verificationResult } = report;
+    const {points, name} = reward;
+    if (!location || !type || !amount || !verificationResult || !points || !name)
       return res.status(400).send("All fields are required");
     const newReport = await Report.create({
       userId,
@@ -20,6 +21,22 @@ export const createReport = async (req, res) => {
       imageUrl,
       verificationResult,
     });
+    await Rewards.create({
+      userId,
+      points,
+      desc: "points Earned for reporting waste",
+      name
+    });
+    await Transaction.create({
+      userId,
+      type:"earned_report",
+      amount: points,
+      description: "Points earned for reporting waste"
+    });
+    await Notifications.create({
+      userId,
+      message: `You have successfully reported a waste of type ${type}.`,
+    })
     res.status(201).json(newReport);
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -77,7 +94,7 @@ export const updateReport = async (req, res) => {
   try {
     const updatedReport = await Report.findByIdAndUpdate(
       reportId,
-      { status, collectorId: status === "Pending" ? null : userId },
+      { status, collectorId: status === "Pending" ? null : userId , collectionDate: status === "Collected" ? new Date() : null },
       {
         new: true,
         projection: {

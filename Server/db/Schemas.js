@@ -10,7 +10,7 @@ const userSchema = mongoose.Schema({
 
 userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
+  this.password = bcrypt.hash(this.password, salt);
   next();
 })
 
@@ -24,6 +24,7 @@ const reportsSchema = mongoose.Schema({
   status: { type: String, required: true, default: "Pending", maxlength: 255 },
   createdAt: { type: Date, default: Date.now, required: true, get: (v) => v instanceof Date ? v : new Date(v) },
   collectorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  collectionDate: { type: Date},
 });
 
 const rewardSchema = mongoose.Schema({
@@ -34,28 +35,26 @@ const rewardSchema = mongoose.Schema({
   isAvailable: { type: Boolean, default: true, required: true },
   desc: { type: String },
   name: { type: String, required: true, maxlength: 255 },
-  collectionInfo: { type: Object, required: true }, // JSON object
 });
 
-const collectedWasteSchema = mongoose.Schema({
-  reportId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Report",
-    required: true,
-  },
-  collectorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  collectionDate: { type: Date, required: true },
-  status: { type: String, default: "Collected", required: true },
-});
+// const collectedWasteSchema = mongoose.Schema({
+//   reportId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Report",
+//     required: true,
+//   },
+//   collectorId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "User",
+//     required: true,
+//   },
+//   collectionDate: { type: Date, required: true },
+//   status: { type: String, default: "Collected", required: true },
+// });
 
 const notificationSchema = mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   message: { type: String, required: true },
-  type: { type: String, required: true, maxlength: 50 },
   isRead: { type: Boolean, default: false, required: true },
   createdAt: { type: Date, default: Date.now, required: true },
 });
@@ -72,10 +71,10 @@ const TransactionSchema = mongoose.Schema({
 export const User = mongoose.model("User", userSchema);
 export const Rewards = mongoose.model("Rewards", rewardSchema);
 export const Report = mongoose.model("Report", reportsSchema);
-export const CollectedWaste = mongoose.model(
-  "CollectedWaste",
-  collectedWasteSchema
-);
+// export const CollectedWaste = mongoose.model(
+//   "CollectedWaste",
+//   collectedWasteSchema
+// );
 export const Notifications = mongoose.model(
   "Notifications",
   notificationSchema

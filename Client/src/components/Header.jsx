@@ -1,26 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuTrigger 
-  } from "@/components/ui/dropdown-menu"
 import {
-  Menu,
-  Coins,
-  Leaf,
-  Bell,
-  LogOut,
-  LogIn,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, Coins, Leaf, Bell, LogOut, LogIn } from "lucide-react";
 import { useAppStore } from "@/store/store";
 import { apiClient } from "@/lib/api-client";
-import { LOGOUT_ROUTE } from "@/utils/constant";
+import {
+  GET_USER_INFO_ROUTE,
+  LOGOUT_ROUTE,
+  MARK_NOTIFICATION_READ_ROUTE,
+} from "@/utils/constant";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-
+import { Badge } from "./ui/badge";
 
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -28,22 +25,58 @@ const Header = ({ onMenuClick }) => {
   const [notifications, setNotifications] = useState([]);
   const { userInfo, setUserInfo } = useAppStore();
 
-  const login = ()=>{
-    navigate("/auth")
-  }
+  const login = () => {
+    navigate("/auth");
+  };
 
-  const logout = async ()=>{
+  const logout = async () => {
     try {
-        const response = await apiClient.get(LOGOUT_ROUTE,{withCredentials:true})
-        if(response.status === 200){
-          toast.success("Logged Out Successfully");
-            setUserInfo(null);
-        }else if(response.status === 500 ){
-          toast.error("Internal Server Error")
-        }
+      const response = await apiClient.get(LOGOUT_ROUTE, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        toast.success("Logged Out Successfully");
+        setUserInfo(null);
+      } else if (response.status === 500) {
+        toast.error("Internal Server Error");
+      }
     } catch (error) {
       toast.error("Error Logging Out");
-      console.log(error);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await apiClient.get(GET_USER_INFO_ROUTE, {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          setUserInfo(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    }, 2000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  async function handleNotificationClick(notificationId) {
+    try {
+      const response = await apiClient.patch(
+        MARK_NOTIFICATION_READ_ROUTE,
+        { notificationId:notificationId },
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        // setNotifications(notifications.forEach((n) => n.id !== notificationId));
+      }
+    } catch (error) {
+      toast.error("Some Error Occured");
+      console.error("Error marking notification as read:", error);
     }
   }
 
@@ -51,10 +84,6 @@ const Header = ({ onMenuClick }) => {
     if (userInfo) {
       setBalance(userInfo.totalBalance);
       setNotifications(userInfo.notification);
-      
-      console.log("userInfo : ",userInfo);
-      console.log("Notification : ",userInfo.notification);
-      console.log("TotBalance : ",userInfo.totalBalance);
     }
   }, [userInfo]);
 
@@ -83,7 +112,6 @@ const Header = ({ onMenuClick }) => {
           </Link>
         </div>
         <div className="flex items-center">
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-2 relative">
@@ -99,11 +127,10 @@ const Header = ({ onMenuClick }) => {
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <DropdownMenuItem
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id)}
+                    key={notification._id}
+                    onClick={() => handleNotificationClick(notification._id)}
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{notification.type}</span>
                       <span className="text-sm text-gray-500">
                         {notification.message}
                       </span>
@@ -111,17 +138,19 @@ const Header = ({ onMenuClick }) => {
                   </DropdownMenuItem>
                 ))
               ) : (
-                <DropdownMenuItem>No new notifications</DropdownMenuItem>
+                <DropdownMenuItem>
+                  No new notifications
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="mr-2 md:mr-4 flex items-center bg-gray-100 rounded-full px-2 md:px-3 py-1">
             <Coins className="h-4 w-4 md:h-5 md:w-5 mr-1 text-green-500" />
             <span className="font-semibold text-sm md:text-base text-gray-800">
-              {balance.toFixed(2)}
+              {balance}
             </span>
           </div>
-          { userInfo ? (
+          {userInfo ? (
             <Button
               onClick={logout}
               className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"
@@ -129,7 +158,7 @@ const Header = ({ onMenuClick }) => {
               Logout
               <LogOut className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5" />
             </Button>
-          ):(
+          ) : (
             <Button
               onClick={login}
               className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"
