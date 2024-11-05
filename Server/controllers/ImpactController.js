@@ -1,4 +1,4 @@
-import { Report, Rewards } from "../db/Schemas.js";
+import { Report, Rewards, User } from "../db/Schemas.js";
 
 export const impactController = async (req, res) => {
   try {
@@ -9,19 +9,25 @@ export const impactController = async (req, res) => {
     const totalWasteData = await Report.aggregate([
       {
         $match: {
-          status: "verified"||"Verified"||"VERIFIED",
-          collectorId: { $exists: true, $ne: null }
+          status: "verified" || "Verified" || "VERIFIED",
+          collectorId: { $exists: true, $ne: null },
         },
       },
       {
         $addFields: {
           numericAmount: {
-           $convert: {
-              input: { $trim: { input: "$amount", chars: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " } },
+            $convert: {
+              input: {
+                $trim: {
+                  input: "$amount",
+                  chars:
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
+                },
+              },
               to: "double",
               onError: 0,
-              onNull: 0
-            }
+              onNull: 0,
+            },
           },
         },
       },
@@ -50,5 +56,72 @@ export const impactController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+  }
+};
+
+function calculateLevel(totalPoints) {
+  const maxLevel = 100;
+  const maxPoints = 10000;
+  const growthFactor = 1.1; // Growth rate for exponential increase
+
+  // Calculate the level using exponential growth
+  let level =
+    Math.log(
+      1 + (totalPoints / maxPoints) * (Math.pow(growthFactor, maxLevel) - 1)
+    ) / Math.log(growthFactor);
+
+  // Ensure the level does not exceed maxLevel
+  return Math.min(Math.floor(level), maxLevel);
+}
+
+export const getLeaderBoard = async (req, res) => {
+  try {
+    const result = await User.aggregate([
+      {
+        $lookup: {
+          from: "rewards", // The name of the Rewards collection
+          localField: "_id", // _id in the User collection
+          foreignField: "userId", // userId in Rewards
+          as: "rewards",
+        },
+      },
+      {
+        $addFields: {
+          totalPoints: {
+            $sum: {
+              $map: {
+                input: "$rewards",
+                as: "reward",
+                in: "$$reward.points",
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          userInfo: {
+            _id: "$_id",
+            name: "$name",
+            email: "$email",
+          },
+          totalPoints: 1,
+        },
+      },
+      {
+        $sort: { totalPoints: -1 },
+      },
+    ]);
+
+    const formattedResult = result.map(user => ({
+      userInfo: user.userInfo,
+      points: user.totalPoints,
+      level: calculateLevel(user.totalPoints)
+    }));
+
+    // Send result to frontend
+    res.json(formattedResult);
+  } catch (err) {
+    console.log(err);
   }
 };

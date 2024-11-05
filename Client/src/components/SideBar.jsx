@@ -1,6 +1,7 @@
-import {Link, useLocation} from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { MapPin, Trash, Coins, Medal, Settings, Home } from "lucide-react"
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { MapPin, Trash, Coins, Medal, Settings, Home } from "lucide-react";
+import { useEffect } from "react";
 
 const sidebarItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -8,24 +9,28 @@ const sidebarItems = [
   { href: "/collect", icon: Trash, label: "Collect Waste" },
   { href: "/rewards", icon: Coins, label: "Rewards" },
   { href: "/leaderboard", icon: Medal, label: "Leaderboard" },
-]
+];
 
-
-export default function SideBar({ open }) {
-    const { pathname } = useLocation();
+export default function SideBar({ open, setOpen }) {
+  const { pathname } = useLocation();
   return (
-    <aside className={`bg-white border-r pt-20 border-gray-200 text-gray-800 w-64 fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+    <aside
+      className={`bg-white border-r pt-20 border-gray-200 text-gray-800 w-64 fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out ${
+        open ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0`}
+    >
       <nav className="h-full flex flex-col justify-between">
         <div className="px-4 py-6 space-y-8">
           {sidebarItems.map((item) => (
-            <Link key={item.href} to={item.href} >
-              <Button 
+            <Link key={item.href} to={item.href}>
+              <Button
+                onClick={() => setOpen(false)}
                 variant={pathname === item.href ? "secondary" : "ghost"}
                 className={`w-full justify-start py-3 ${
-                  pathname === item.href 
-                    ? "bg-green-100 text-green-800" 
+                  pathname === item.href
+                    ? "bg-green-100 text-green-800"
                     : "text-gray-600 hover:bg-gray-100"
-                }`} 
+                }`}
               >
                 <item.icon className="mr-3 h-5 w-5" />
                 <span className="text-base">{item.label}</span>
@@ -34,21 +39,22 @@ export default function SideBar({ open }) {
           ))}
         </div>
         <div className="p-4 border-t border-gray-200">
-          <Link to="/settings" key="/settings">
-            <Button 
+          {/* <Link to="/settings" key="/settings">
+            <Button
+              onClick={() => setOpen(false)}
               variant={pathname === "/settings" ? "secondary" : "outline"}
               className={`w-full py-3 ${
                 pathname === "/settings"
                   ? "bg-green-100 text-green-800"
                   : "text-gray-600 border-gray-300 hover:bg-gray-100"
-              }`} 
+              }`}
             >
               <Settings className="mr-3 h-5 w-5" />
               <span className="text-base">Settings</span>
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </nav>
     </aside>
-  )
+  );
 }

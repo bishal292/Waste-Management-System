@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './Routes/AuthRoutes.js';
 import userRouter from './Routes/UserRoutes.js';
-import { impactController } from './controllers/ImpactController.js';
+import { getLeaderBoard, impactController } from './controllers/ImpactController.js';
 import reportRouter from './Routes/ReportRoutes.js';
 
 dotenv.config();
@@ -33,6 +33,7 @@ app.use("/api/user", userRouter);
 app.use("/api/report", reportRouter);
 
 app.get("/api/impact-data", impactController);
+app.get("/api/leaderboard-data", getLeaderBoard);
 
 
 app.get("/",(req, res, next) => {

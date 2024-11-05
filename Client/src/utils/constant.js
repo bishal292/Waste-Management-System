@@ -27,6 +27,7 @@ export const SET_NOTIFICATION_ROUTE = `${USER_ROUTE}/set-notification`;
 export const MARK_NOTIFICATION_READ_ROUTE = `${USER_ROUTE}/mark-notification-read`;
 
 export const IMPACT_DATA_ROUTE = "/api/impact-data"
+export const LEADERBOARD_DATA_ROUTE = "/api/leaderboard-data"
 
 export const Gemini_Api_key = import.meta.env.VITE_GEMINI_API_KEY;
 export const Location_Api = import.meta.env.VITE_LOCATION_API;

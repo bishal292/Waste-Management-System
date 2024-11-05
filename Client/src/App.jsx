@@ -41,7 +41,7 @@ const HeaderSidebarLayout = ({ children }) => {
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
       />
       <div className="flex flex-1">
-        <SideBar open={sidebarOpen} />
+        <SideBar open={sidebarOpen} setOpen={setSidebarOpen} />
         <main className="flex-1 p-4 lg:p-8 ml-0 lg:ml-64 transition-all duration-300">
           {children}
         </main>
