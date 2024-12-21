@@ -134,7 +134,7 @@ const Reward = () => {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
             Recent Transactions
           </h2>
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-x-hidden h-[250px]">
             {transactions.length > 0 ? (
               transactions.map((transaction) => (
                 <div

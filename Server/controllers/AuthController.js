@@ -1,7 +1,6 @@
 import { Notifications, Rewards, Transaction, User } from "../db/Schemas.js";
 import jwt from "jsonwebtoken";
 import { compare } from "bcrypt";
-import mongoose from "mongoose";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds.
 
@@ -58,9 +57,6 @@ export const login = async (req, res) => {
       return res.status(404).send("User not found");
     }
     const auth = await compare(password, user.password);
-    console.log(
-      `Origing Password: ${password} , Hashed Password: ${user.password}`
-    );
 
     if (!auth) {
       console.log(`Invalid credentials`);

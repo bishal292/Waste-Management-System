@@ -175,35 +175,30 @@ const Report = () => {
       const result = await model.generateContent([prompt, ...imageParts]);
 
       const response = result.response;
-      const text = response.text();
+      const text = await response.text().match(/\{[^]*\}/); // Extract JSON from response(text between { }  including the braces itself.)
       const parsedResult = JSON.parse(text);
 
-      try {
-        if (parsedResult.message === "Not a waste") {
-          toast.error("The uploaded image does not contain waste.");
-          setVerificationStatus("failure");
-          return;
-        }
-        if (
-          parsedResult.wasteType &&
-          parsedResult.quantity &&
-          parsedResult.confidence
-        ) {
-          toast.success(`Waste categorized as ${parsedResult.wasteType}`);
-          setVerificationResult(parsedResult);
-          setVerificationStatus("success");
-          setNewReport({
-            ...newReport,
-            type: parsedResult.wasteType,
-            amount: parsedResult.quantity,
-          });
-        } else {
-          toast.error("Invalid verification result.");
-          console.error("Invalid verification result:", parsedResult);
-          setVerificationStatus("failure");
-        }
-      } catch (error) {
-        console.error("Failed to parse JSON response:", text);
+      if (parsedResult.message === "Not a waste") {
+        toast.error("The uploaded image does not contain waste.");
+        setVerificationStatus("failure");
+        return;
+      }
+      if (
+        parsedResult.wasteType &&
+        parsedResult.quantity &&
+        parsedResult.confidence
+      ) {
+        toast.success(`Waste categorized as ${parsedResult.wasteType}`);
+        setVerificationResult(parsedResult);
+        setVerificationStatus("success");
+        setNewReport({
+          ...newReport,
+          type: parsedResult.wasteType,
+          amount: parsedResult.quantity,
+        });
+      } else {
+        toast.error("Invalid verification result.");
+        console.error("Invalid verification result:", parsedResult);
         setVerificationStatus("failure");
       }
     } catch (error) {
