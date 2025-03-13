@@ -37,9 +37,7 @@ const HeaderSidebarLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-      />
+      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1">
         <SideBar open={sidebarOpen} setOpen={setSidebarOpen} />
         <main className="flex-1 p-4 lg:p-8 ml-0 lg:ml-64 transition-all duration-300">
@@ -52,11 +50,11 @@ const HeaderSidebarLayout = ({ children }) => {
 
 const router = createBrowserRouter([
   {
-    path: "/home",
+    path: "/",
     element: (
-        <HeaderSidebarLayout>
-          <Home />
-        </HeaderSidebarLayout>
+      <HeaderSidebarLayout>
+        <Home />
+      </HeaderSidebarLayout>
     ),
   },
   {
@@ -118,7 +116,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "*",
+    path: "/*",
     element: <Navigate to="/auth" />, // Redirect to auth page for any other route
   },
 ]);
@@ -136,9 +134,9 @@ function App() {
         });
         if (res.status === 200 && res.data) {
           console.log("Response", res);
-          console.log("Data : ",res.data);
-          console.log("User: ",res.data.user);
-          console.log("Notification : ",res.data.notification);
+          console.log("Data : ", res.data);
+          console.log("User: ", res.data.user);
+          console.log("Notification : ", res.data.notification);
           setUserInfo(res.data);
         } else {
           setUserInfo(undefined);
@@ -159,7 +157,11 @@ function App() {
   }, [userInfo, setUserInfo]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return <RouterProvider router={router} />;
