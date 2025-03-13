@@ -20,8 +20,8 @@ app.use(cookieParser());
 
 console.log(process.env.CLIENT_URL);
 const corsOptions = {
-  origin:
-    process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app",
+  origin: [
+    process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app",],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 };
@@ -41,6 +41,6 @@ app.get("/", (req, res, next) => {
   next();
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+app.listen(() => {
+  console.log("Server is running...");
 });
