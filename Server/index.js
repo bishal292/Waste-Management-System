@@ -19,33 +19,15 @@ app.use(express.json());
 app.use(cookieParser());
 
 console.log(process.env.CLIENT_URL);
-// const corsOptions = {
-//   origin:
-//     process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app",
-//   credentials: true,
-//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-// };
+const corsOptions = {
+  origin:
+    process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
-// // Manually set CORS headers in responses
-// app.use((req, res, next) => {
-//   res.header(
-//     "Access-Control-Allow-Origin",
-//     process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app"
-//   );
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   next();
-// });
-
-app.use(cors({
-    origin: '*', // Allow requests from all origins
-    credentials: true, // If you need to send cookies or authentication headers
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
