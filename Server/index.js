@@ -11,7 +11,6 @@ import reportRouter from './Routes/ReportRoutes.js';
 dotenv.config();
 
 connectDB();
-const port = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -41,6 +40,6 @@ app.get("/",(req, res, next) => {
     next();
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen(() => {
+    console.log(`Server is running`);
 });
