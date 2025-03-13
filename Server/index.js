@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 // Cors for cross connection between frontend and backend.
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app/",
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE'],
 }));
