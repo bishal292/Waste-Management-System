@@ -3,20 +3,23 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const connectDB = async () => {
-    const connection_String = process.env.DB_URL;
-    try {
-        await mongoose.connect(connection_String);
-        console.log("MongoDB Connected Successfully");
-    } catch (error) {
-        console.error("Error Connecting with MongoDB:", error);
-    }
+  try {
+    await mongoose.connect(process.env.DB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1);
+  }
 };
 
 export const disconnectDB = async () => {
-    try {
-        await mongoose.disconnect();
-        console.log("MongoDB Disconnected Successfully");
-    } catch (error) {
-        console.error("Error Disconnecting with MongoDB:", error);
-    }
+  try {
+    await mongoose.disconnect();
+    console.log("MongoDB Disconnected Successfully");
+  } catch (error) {
+    console.error("Error Disconnecting with MongoDB:", error);
+  }
 };

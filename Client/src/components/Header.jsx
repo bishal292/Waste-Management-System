@@ -58,7 +58,7 @@ const Header = ({ onMenuClick }) => {
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
-    }, 2000);
+    }, 60000);
     return () => {
       clearInterval(interval);
     };
@@ -116,7 +116,7 @@ const Header = ({ onMenuClick }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="mr-2 relative">
                 <Bell className="h-5 w-5" />
-                {notifications.length > 0 && (
+                {notifications && notifications.length > 0 && (
                   <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.2rem] h-5">
                     {notifications.length}
                   </Badge>
@@ -124,7 +124,7 @@ const Header = ({ onMenuClick }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              {notifications.length > 0 ? (
+              {notifications && notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification._id}

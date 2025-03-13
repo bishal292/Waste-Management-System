@@ -21,8 +21,13 @@ export const signup = async (req, res) => {
       console.log(`Email already exists`);
       return res.status(409).send("User with email Already exists");
     }
+    if (password.length < 4) {
+      return res.status(400).send("Password must be atleast 4 characters long");
+    }
 
-    const user = await User.create({ email, password, name });
+
+    const user = new User({ email, password, name });
+    await user.save();
     res.cookie("jwt", createToken(user.email, user._id), {
       secure: true,
       sameSite: true,
@@ -31,7 +36,7 @@ export const signup = async (req, res) => {
 
     res.status(201).json({
       notification: [],
-      totalBalance,
+      totalBalance: 0,
       user: {
         email: user.email,
         id: user._id,

@@ -14,7 +14,6 @@ const LeaderBoard = () => {
       const response = await apiClient.get(LEADERBOARD_DATA_ROUTE);
       if (response.status === 200 && response.data) {
         setRewards(response.data);
-        console.log(response.data);
       }
     };
     fetchLeaderBoard();

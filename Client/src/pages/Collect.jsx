@@ -61,7 +61,7 @@ const Collect = () => {
     confidence: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const pageCount = Math.ceil(totalReports / 5);
+  const pageCount = Math.ceil(totalReports / 5) || 1;
   const user = userInfo.user;
   const isFirstRender = useRef(true);
 
@@ -75,7 +75,6 @@ const Collect = () => {
       if (response.status === 200 && response.data) {
         setTotalReports(response.data.totalReports);
         const resReport = response.data.reports;
-        console.log("RES ", resReport);
         const formattedFetchedReports = resReport.map((report) => ({
           id: report.id,
           location: report.location,
@@ -90,7 +89,6 @@ const Collect = () => {
           ...formattedFetchedReports,
         ]);
       }
-      console.log(response);
     } catch (error) {
       console.error("Some Error Occured");
     }
@@ -130,7 +128,6 @@ const Collect = () => {
           )
         );
       }
-      console.log(response);
 
       toast.success("Updating task status...");
     } catch (error) {
@@ -253,7 +250,7 @@ const Collect = () => {
           );
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
 
         console.error("Failed to parse JSON response:", text);
         setVerificationStatus("failure");
