@@ -9,7 +9,7 @@ import { useAppStore } from "./store/store";
 import { GET_USER_INFO_ROUTE } from "./utils/constant";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
-import Collect from "./pages/collect";
+import Collect from "./pages/Collect"; // Ensure the case matches the file name
 import Reward from "./pages/Reward";
 import Report from "./pages/Report";
 import Header from "./components/Header";
