@@ -1,7 +1,9 @@
 import { Report, Rewards, User } from "../db/Schemas.js";
+import { getDBConnection } from "../db/dbConfig.js";
 
 export const impactController = async (req, res) => {
   try {
+    await getDBConnection();
     // Count the total number of reports
     const totalReports = await Report.countDocuments();
 
@@ -76,6 +78,7 @@ function calculateLevel(totalPoints) {
 
 export const getLeaderBoard = async (req, res) => {
   try {
+    await getDBConnection();
     const result = await User.aggregate([
       {
         $lookup: {

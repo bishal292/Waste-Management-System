@@ -1,7 +1,9 @@
 import { Report, Notifications, Rewards, Transaction } from "../db/Schemas.js";
+import { getDBConnection } from "../db/dbConfig.js";
 
 export const createReport = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -46,6 +48,7 @@ export const createReport = async (req, res) => {
 
 export const getRecentReports = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -84,41 +87,47 @@ export const getRecentReports = async (req, res) => {
 };
 
 export const updateReport = async (req, res) => {
-  const userId = req.userId;
-  if (!userId) {
-    return res.status(401).send("You are not Authenticated.");
-  }
-  const { reportId, status } = req.body;
-  if (!reportId || !status)
-    return res.status(400).send("All fields are required");
   try {
-    const updatedReport = await Report.findByIdAndUpdate(
-      reportId,
-      { status, collectorId: status === "Pending" ? null : userId , collectionDate: status === "Collected" ? new Date() : null },
-      {
-        new: true,
-        projection: {
-          _id: 1,
-          location: 1,
-          wasteType: 1,
-          amount: 1,
-          status: 1,
-          createdAt: 1,
-          collectorId: 1,
-        },
-      }
-    );
-    const formatedReport = {
-      id: updatedReport._id,
-      location: updatedReport.location,
-      wasteType: updatedReport.wasteType,
-      amount: updatedReport.amount,
-      status: updatedReport.status,
-      date: updatedReport.createdAt,
-      collectorId: updatedReport.collectorId,
-    };
-    res.status(200).json(formatedReport);
-    // }
+    await getDBConnection();
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).send("You are not Authenticated.");
+    }
+    const { reportId, status } = req.body;
+    if (!reportId || !status)
+      return res.status(400).send("All fields are required");
+    try {
+      const updatedReport = await Report.findByIdAndUpdate(
+        reportId,
+        { status, collectorId: status === "Pending" ? null : userId , collectionDate: status === "Collected" ? new Date() : null },
+        {
+          new: true,
+          projection: {
+            _id: 1,
+            location: 1,
+            wasteType: 1,
+            amount: 1,
+            status: 1,
+            createdAt: 1,
+            collectorId: 1,
+          },
+        }
+      );
+      const formatedReport = {
+        id: updatedReport._id,
+        location: updatedReport.location,
+        wasteType: updatedReport.wasteType,
+        amount: updatedReport.amount,
+        status: updatedReport.status,
+        date: updatedReport.createdAt,
+        collectorId: updatedReport.collectorId,
+      };
+      res.status(200).json(formatedReport);
+      // }
+    } catch (error) {
+      console.log("Some Error Occurred:", error);
+      res.status(500).send("Internal Server Error");
+    }
   } catch (error) {
     console.log("Some Error Occurred:", error);
     res.status(500).send("Internal Server Error");

@@ -1,8 +1,10 @@
 import { Notifications, Report, Rewards, Transaction } from "../db/Schemas.js";
+import { getDBConnection } from "../db/dbConfig.js";
 
 // post request controller to set rewards for a user.
 export const setReward = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -52,6 +54,7 @@ export const setReward = async (req, res) => {
 // get request controller to get all the transactions and rewards of a user.
 export const getTransactionAndRewards = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -71,6 +74,7 @@ export const getTransactionAndRewards = async (req, res) => {
 // post request controller to redeem rewards or mark a reward as read for a user.
 export const redeemReward = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -109,6 +113,7 @@ export const redeemReward = async (req, res) => {
 
 export const redeemAllRewards = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -140,6 +145,7 @@ export const redeemAllRewards = async (req, res) => {
 // to respond all the reports reported by the user.
 export const getReports = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
@@ -166,6 +172,7 @@ export const getReports = async (req, res) => {
 
 export const markNotificationRead = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");

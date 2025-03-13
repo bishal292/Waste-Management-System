@@ -45,11 +45,12 @@ VITE_GEMINI_API_KEY=<your_gemini_api_key>
 ### Server-Side (Backend)
 **Directory Structure**:
 ```
-/controllers   -> Application backend API controller functions.
-/db            -> Database connection and schemas.
-/middleware    -> Middleware for request handling.
-/routes        -> API routes.
-/index.js      -> Main entry point for the backend.
+Server(Root Directory)/
+  /controllers/   -> Application backend API controller functions.
+  /db/            -> Database connection and schemas.
+  /middleware/    -> Middleware for request handling.
+  /routes/        -> API routes.
+  index.js      -> Main entry point for the backend.
 ```
 
 **Environment Variables** (`.env`):

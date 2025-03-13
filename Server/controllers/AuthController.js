@@ -1,6 +1,7 @@
 import { Notifications, Rewards, Transaction, User } from "../db/Schemas.js";
 import jwt from "jsonwebtoken";
 import { compare } from "bcrypt";
+import { getDBConnection } from "../db/dbConfig.js";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds.
 
@@ -12,6 +13,7 @@ const createToken = (email, id) => {
 
 export const signup = async (req, res) => {
   try {
+    await getDBConnection();
     const { email, password, name } = req.body;
     if (!email || !password || !name)
       return res.status(400).send("All fields are required");
@@ -51,6 +53,7 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    await getDBConnection();
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).send("Email and password are required");
@@ -97,6 +100,7 @@ export const login = async (req, res) => {
 
 export const getUserInfo = async (req, res) => {
   try {
+    await getDBConnection();
     const userId = req.userId;
     if (!userId) return res.status(401).send("You are not Authenticated");
 
@@ -124,6 +128,7 @@ export const getUserInfo = async (req, res) => {
 
 export const logOut = async (req, res) => {
   try {
+    await getDBConnection();
     res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: true });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {
