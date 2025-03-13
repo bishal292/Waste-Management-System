@@ -1,12 +1,15 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import { connectDB } from './db/dbConfig.js';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import authRouter from './Routes/AuthRoutes.js';
-import userRouter from './Routes/UserRoutes.js';
-import { getLeaderBoard, impactController } from './controllers/ImpactController.js';
-import reportRouter from './Routes/ReportRoutes.js';
+import express from "express";
+import dotenv from "dotenv";
+import { connectDB } from "./db/dbConfig.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import authRouter from "./Routes/AuthRoutes.js";
+import userRouter from "./Routes/UserRoutes.js";
+import {
+  getLeaderBoard,
+  impactController,
+} from "./controllers/ImpactController.js";
+import reportRouter from "./Routes/ReportRoutes.js";
 
 dotenv.config();
 
@@ -15,19 +18,28 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// Cors for cross connection between frontend and backend.
-// app.use(cors({
-//     origin: process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app/",
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE'],
-// }));
-app.use(cors());
+console.log(process.env.CLIENT_URL);
+const corsOptions = {
+  origin:
+    process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+};
 
-// middlewares
+app.use(cors(corsOptions));
+
+// Manually set CORS headers in responses
 app.use((req, res, next) => {
-    console.log(`Request_Endpoint: ${req.method} ${req.url}`);
-    next();
+  res.header(
+    "Access-Control-Allow-Origin",
+    process.env.CLIENT_URL || "https://waste-management-client-lake.vercel.app"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
 });
+
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/report", reportRouter);
@@ -35,12 +47,11 @@ app.use("/api/report", reportRouter);
 app.get("/api/impact-data", impactController);
 app.get("/api/leaderboard-data", getLeaderBoard);
 
-
-app.get("/",(req, res, next) => {
-    res.send('Hello World');
-    next();
+app.get("/", (req, res, next) => {
+  res.send("Hello World");
+  next();
 });
 
-app.listen(() => {
-    console.log(`Server is running`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });

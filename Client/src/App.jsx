@@ -28,7 +28,7 @@ const PrivateRoutes = ({ children }) => {
 const AuthRoutes = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
-  return isAuthenticated ? <Navigate to="/home" /> : children;
+  return isAuthenticated ? <Navigate to="/" /> : children;
 };
 
 // Layout Component for Pages with Header & Sidebar
@@ -123,11 +123,12 @@ const router = createBrowserRouter([
 
 // Main App Component
 function App() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { userInfo, setUserInfo } = useAppStore();
 
   useEffect(() => {
     const getUserData = async () => {
+      setLoading(true);
       try {
         const res = await apiClient.get(GET_USER_INFO_ROUTE, {
           withCredentials: true,

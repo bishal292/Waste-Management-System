@@ -30,8 +30,8 @@ export const Auth = () => {
         return false;
       }
     }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long");
+    if (password.length < 4) {
+      toast.error("Password must be at least 4 characters long");
       return false;
     }
     return true;
@@ -51,8 +51,8 @@ export const Auth = () => {
         return false;
       }
     }
-    if (password.length < 3) {
-      toast.error("Password must be at least 8 characters long");
+    if (password.length < 4) {
+      toast.error("Password must be at least 4 characters long");
       return false;
     }
     if (password !== confirmPassword) {
@@ -74,7 +74,7 @@ export const Auth = () => {
         if (res.status === 200) {
           toast.success("Login Successful");
           setUserInfo(res.data);
-          navigate("/home");
+          navigate("/");
         }
       }
     } catch (error) {
@@ -107,9 +107,8 @@ export const Auth = () => {
         );
         if (res.status === 201) {
           setUserInfo(res.data.user);
-          navigate("/home");
+          navigate("/");
         }
-        console.log(res);
       }
     } catch (error) {
       if (error.response.status) {

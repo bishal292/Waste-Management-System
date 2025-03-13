@@ -31,7 +31,6 @@ const Reward = () => {
           withCredentials: true,
         });
         if (response.status === 200 && response.data) {
-          console.log(response.data);
           const trans = response.data.transactions;
           trans.forEach((transaction) => {
             transaction.date = transaction.date.split("T")[0];
@@ -41,7 +40,7 @@ const Reward = () => {
           setLoading(false);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchdata();
@@ -57,7 +56,6 @@ const Reward = () => {
     const toatalpoints = balance;
     const response = await apiClient.patch(REDEEM_ALL_REWARD_ROUTE,{points:toatalpoints},{withCredentials:true});
     if (response.status === 200 && response.data) {
-      console.log(response.data);
       setTransactions((prevTransactions) => [
         {
           _id:"fjd9w8ef98bsib",
@@ -82,8 +80,6 @@ const Reward = () => {
       { withCredentials: true }
     );
     if (response.status === 200 && response.data) {
-      console.log(response);
-      console.log(response.data);
       setTransactions((prevTransactions) => [
         {
           _id: rewardId,

@@ -28,7 +28,6 @@ const Report = () => {
 
   const fetchReports = async () => {
     try {
-      console.log("Fetch reports is called");
       const response = await apiClient.get(GET_REPORT_ROUTE, {
         withCredentials: true,
         // params: {
@@ -37,7 +36,6 @@ const Report = () => {
         // },
       });
       if (response.data) {
-        console.log(response.data);
         const formattedFetchedReports = response.data.map((report) => ({
           id: report._id,
           location: report.location,
@@ -45,14 +43,12 @@ const Report = () => {
           amount: report.amount,
           createdAt: report.createdAt.split("T")[0],
         }));
-        console.log(formattedFetchedReports);
         setReports(formattedFetchedReports);
       }
     } catch (error) {}
   };
 
   useEffect(() => {
-    console.log("Fetching reports...");
     fetchReports();
   }, []);
 
@@ -73,7 +69,6 @@ const Report = () => {
 
       // Create reward for reporting waste
       const points = createRewardPoints(parseInt(verificationResult.quantity.match(/\d+/)[0]) , 10 , 20);
-      console.log("Points : ",points," Quantity : ",verificationResult.quantity);
       const response = await apiClient.post(
         CREATE_REPORT_ROUTE,
         { report: createdReport,
