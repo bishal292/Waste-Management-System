@@ -58,8 +58,8 @@ app.use(
 );
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "API is running" })
-})
+  res.json({ status: "ok", message: "API is running" });
+});
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
@@ -74,18 +74,20 @@ app.get("/", (req, res, next) => {
 });
 
 if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000
+  const PORT = process.env.PORT || 3000;
   mongoose
     .connect(process.env.DB_URL)
     .then(() => {
-      console.log("Connected to MongoDB")
+      console.log("Connected to MongoDB");
       app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`)
-      })
+        console.log(`Server running on port ${PORT}`);
+      });
     })
     .catch((err) => {
-      console.error("MongoDB connection error:", err)
-    })
+      console.error("MongoDB connection error:", err);
+    });
 }
 
-export default app;
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
+});
