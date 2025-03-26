@@ -63,11 +63,11 @@ const Collect = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageCount = Math.ceil(totalReports / 5) || 1;
   const user = userInfo.user;
-  const isFirstRender = useRef(true);
 
   const fetchReports = async ({ skip, limit }) => {
     if (reports.length === totalReports && totalReports > 0) return;
     try {
+      setLoading(true);
       const response = await apiClient.get(GET_REPORTS_TO_COLLECT, {
         withCredentials: true,
         params: { skip, limit },
@@ -91,14 +91,14 @@ const Collect = () => {
       }
     } catch (error) {
       console.error("Some Error Occured");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     // fetch reports data along with total reports count
     fetchReports({ skip: currentPage * 5 - 5, limit: 5 });
-    setLoading(false);
-    isFirstRender.current = false;
   }, []);
   useEffect(() => {
     const startIndex = (currentPage - 1) * 5;
@@ -127,9 +127,8 @@ const Collect = () => {
             task.id === taskId ? { ...task, ...updatedReport } : task
           )
         );
+        toast.success("Updated task status successfully!");
       }
-
-      toast.success("Updating task status...");
     } catch (error) {
       console.error("Error updating task status:", error);
       toast.error("Failed to update task status. Please try again.");
@@ -176,89 +175,87 @@ const Collect = () => {
 
       const prompt = `You are an expert in waste management and recycling. Analyze this image and provide:
       1. Confirm if the waste type matches it is required to be same: ${selectedTask.wasteType}
-      2. Estimate if the quantity matches, igonre some minor difference with compared to: ${selectedTask.amount}
+      2. Estimate if the quantity matches, ignore some minor difference with compared to: ${selectedTask.amount}
       3. Your confidence level in this assessment (as a percentage)
-      
-      Respond in JSON format exact like this without any changes:
+
+      Respond strictly in JSON format without any additional text or explanation:
       {
         "wasteTypeMatch": true/false,
         "quantityMatch": true/false,
         "confidence": confidence level as a number between 0 and 1
-      }
-      `;
+      }`;
 
       const result = await model.generateContent([prompt, ...imageParts]);
-      const text = result.response.text();
-      console.log("Response from Gemini AI:", text);
+      let text = result.response.text();
 
-      try {
-        const parsedResult = JSON.parse(text);
-        console.log("Parsed result:", parsedResult);
-        setVerificationResult({...parsedResult});
-        setVerificationStatus("success");
+      // Sanitize the response to remove unwanted characters like backticks
+      text = text.replace(/```json|```/g, "").trim();
 
-        if (
-          parsedResult.wasteTypeMatch &&
-          parsedResult.quantityMatch &&
-          parsedResult.confidence > 0.6
-        ) {
+      const parsedResult = JSON.parse(text); // Parse the sanitized JSON
+      console.log("Parsed result:", parsedResult);
+      setVerificationResult({ ...parsedResult });
 
-          const response = await apiClient.patch(
-            UPDATE_REPORT_STATUS,
-            { reportId: selectedTask.id, status: "Collected" },
+      if (
+        parsedResult.wasteTypeMatch &&
+        parsedResult.quantityMatch &&
+        parsedResult.confidence > 0.6
+      ) {
+        const response = await apiClient.patch(
+          UPDATE_REPORT_STATUS,
+          { reportId: selectedTask.id, status: "Collected" },
+          { withCredentials: true }
+        );
+
+        if (response.status === 200 && response.data) {
+          const points = createRewardPoints(
+            parseInt(selectedTask.amount),
+            20,
+            50
+          ); // For collection reward point ranges between 20 -50 based on waste collection.
+          const rewardResponse = await apiClient.post(
+            SET_REWARD_ROUTE,
+            { points, name: "collect" },
             { withCredentials: true }
           );
-          if (response.status === 200 && response.data) {
-            const points = createRewardPoints(parseInt(selectedTask.amount),20,50); //For collection reward point ranges between 20 -50 based on waste collection.
-            const rewardresponse = await apiClient.post(
-                SET_REWARD_ROUTE,
-                { points, name: "collect" },
-                { withCredentials: true }
-              );
-            if (rewardresponse.status === 201) {
-              toast.success(`Verification successful! You earned ${points} reward points!`);
-            } else {
-              toast.error(" Verification success but Failed to save reward points.");
-            }
-            const newUpdatedReport = response.data;
-            newUpdatedReport.date = newUpdatedReport.date.split("T")[0];
-            setReports((prev) =>
-              prev.map((task) =>
-                task.id === selectedTask.id ? { ...task, ...newUpdatedReport } : task
-              )
+
+          if (rewardResponse.status === 201) {
+            toast.success(
+              `Verification successful! You earned ${points} reward points!`
             );
-            setVerificationStatus("idle");
-            setSelectedTask(null);
-            verificationImage(null);
           } else {
             toast.error(
-              "Internal Server Error. Failed to update task status.",
-              {
-                duration: 1000,
-                position: "top-center",
-              }
+              "Verification success but failed to save reward points."
             );
           }
 
-        } else {
-          toast.error(
-            "Verification failed. The collected waste does not match the reported waste.",
-            {
-              duration: 1000,
-              position: "top-center",
-            }
+          const newUpdatedReport = response.data;
+          newUpdatedReport.date = newUpdatedReport.date.split("T")[0];
+          setReports((prev) =>
+            prev.map((task) =>
+              task.id === selectedTask.id
+                ? { ...task, ...newUpdatedReport }
+                : task
+            )
           );
-        }
-      } catch (error) {
-        console.error(error);
 
-        console.error("Failed to parse JSON response:", text);
-        setVerificationStatus("failure");
+          setVerificationStatus("success");
+          setSelectedTask(null); // Close the popup
+          setVerificationImage(null); // Clear the uploaded image
+          return; // Exit the function after successful verification
+        } else {
+          toast.error("Internal Server Error. Failed to update task status.");
+        }
+      } else {
+        toast.error(
+          "Verification failed. The collected waste does not match the reported waste."
+        );
       }
     } catch (error) {
       console.error("Error verifying waste:", error);
-      setVerificationStatus("failure");
     }
+
+    // Set failure status if any error occurs or verification fails
+    setVerificationStatus("failure");
   };
 
   return (
@@ -357,7 +354,7 @@ const Collect = () => {
                       </>
                     )}
                   {task.status === "in_progress" &&
-                    task.collectorId !== user.id && (
+                    task.collectorId !== user?.id && (
                       <span className="text-yellow-600 text-sm font-medium">
                         In progress by another collector
                       </span>
@@ -445,7 +442,7 @@ const Collect = () => {
               onClick={handleVerify}
               className="w-full"
               disabled={
-                !verificationImage || verificationStatus === "verifying"
+                !verificationImage || verificationStatus === "verifying" || !verificationStatus === "success"
               }
             >
               {verificationStatus === "verifying" ? (
@@ -453,12 +450,16 @@ const Collect = () => {
                   <Loader className="animate-spin -ml-1 mr-3 h-5 w-5" />
                   Verifying...
                 </>
-              ) : (
-                "Verify Collection"
+              ) : (<>
+                {verificationStatus === "success" ? "Verified" : "Verify Collection"}           
+              </>
               )}
             </Button>
             {verificationStatus === "success" && verificationResult && (
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <h4 className="text-lg font-semibold text-green-800 mb-2">
+                  Verification Result
+                </h4>
                 <p>
                   Waste Type Match:{" "}
                   {verificationResult.wasteTypeMatch ? "Yes" : "No"}
@@ -474,9 +475,23 @@ const Collect = () => {
               </div>
             )}
             {verificationStatus === "failure" && (
-              <p className="mt-2 text-red-600 text-center text-sm">
-                Verification failed. Please try again.
-              </p>
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="mt-2 text-red-600 text-center text-sm">
+                  Verification failed. Please try again.
+                </p>
+                <p>
+                  Waste Type Match:{" "}
+                  {verificationResult.wasteTypeMatch ? "Yes" : "No"}
+                </p>
+                <p>
+                  Quantity Match:{" "}
+                  {verificationResult.quantityMatch ? "Yes" : "No"}
+                </p>
+                <p>
+                  Confidence: {(verificationResult.confidence * 100).toFixed(2)}
+                  %
+                </p>
+              </div>
             )}
             <Button
               onClick={() => setSelectedTask(null)}
@@ -492,7 +507,7 @@ const Collect = () => {
       {/* Add a conditional render to show user info or login prompt */}
       {userInfo ? (
         <p className="text-sm text-gray-600 mb-4">
-          Logged in as: {userInfo.user.name}
+          Logged in as: {userInfo.user?.name}
         </p>
       ) : (
         <p className="text-sm text-red-600 mb-4">

@@ -40,6 +40,7 @@ export const impactController = async (req, res) => {
         },
       },
     ]);
+    
     const totalWasteCollected = totalWasteData[0]?.totalWaste || 0;
 
     // Sum the total tokens earned from the Rewards collection
@@ -64,7 +65,7 @@ export const impactController = async (req, res) => {
 function calculateLevel(totalPoints) {
   const maxLevel = 100;
   const maxPoints = 10000;
-  const growthFactor = 1.1; // Growth rate for exponential increase
+  const growthFactor = 1.01; // Growth rate for exponential increase
 
   // Calculate the level using exponential growth
   let level =

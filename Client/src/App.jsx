@@ -16,19 +16,39 @@ import Header from "./components/Header";
 import SideBar from "./components/SideBar";
 import LeaderBoard from "./pages/LeaderBoards";
 import Settings from "./pages/Settings";
+import { Loader } from "lucide-react";
 
 // Private Route Wrapper
 const PrivateRoutes = ({ children }) => {
   const { userInfo } = useAppStore();
-  const isAuthenticated = !!userInfo;
-  return isAuthenticated ? children : <Navigate to="/auth" />;
+
+  if (userInfo === undefined || userInfo === null) {
+    return (
+      <>
+        <div className="w-full h-screen flex justify-center items-center">
+          <Loader className=" animate-spin h-10 w-10 " />
+        </div>
+      </>
+    );
+  }
+
+  return userInfo.user ? children : <Navigate to="/auth" />;
 };
 
 // Auth Route Wrapper
 const AuthRoutes = ({ children }) => {
   const { userInfo } = useAppStore();
-  const isAuthenticated = !!userInfo;
-  return isAuthenticated ? <Navigate to="/" /> : children;
+  if (userInfo === undefined || userInfo === null) {
+    return (
+      <>
+        <div className="w-full h-screen flex justify-center items-center">
+          <Loader className=" animate-spin h-10 w-10 " />
+        </div>
+      </>
+    );
+  }
+
+  return userInfo.user ? <Navigate to="/" /> : children;
 };
 
 // Layout Component for Pages with Header & Sidebar
@@ -139,12 +159,10 @@ function App() {
           console.log("User: ", res.data.user);
           console.log("Notification : ", res.data.notification);
           setUserInfo(res.data);
-        } else {
-          setUserInfo(undefined);
         }
       } catch (err) {
         console.log(err);
-        setUserInfo(undefined);
+        setUserInfo({});
       } finally {
         setLoading(false);
       }

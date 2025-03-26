@@ -24,9 +24,9 @@ const Reward = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
     const fetchdata = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.get(FETCH_TRANSACTIONS_REWARD_ROUTE, {
           withCredentials: true,
         });
@@ -37,10 +37,11 @@ const Reward = () => {
           });
           setTransactions(response.data.transactions);
           setRewards(response.data.rewards);
-          setLoading(false);
         }
       } catch (error) {
         console.error(error);
+      }finally{
+        setLoading(false);
       }
     };
     fetchdata();
@@ -99,7 +100,7 @@ const Reward = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-full w-full">
         <Loader className="animate-spin h-8 w-8 text-gray-600" />
       </div>
     );
@@ -107,7 +108,6 @@ const Reward = () => {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">Rewards</h1>
-
       <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full border-l-4 border-green-500 mb-8">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
           Reward Balance

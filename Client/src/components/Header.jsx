@@ -72,7 +72,7 @@ const Header = ({ onMenuClick }) => {
         { withCredentials: true }
       );
       if (response.status === 200) {
-        // setNotifications(notifications.forEach((n) => n.id !== notificationId));
+        setNotifications(notifications.filter((n) => n.id !== notificationId));
       }
     } catch (error) {
       toast.error("Some Error Occured");

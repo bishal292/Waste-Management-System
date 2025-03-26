@@ -11,7 +11,6 @@ import {
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { apiClient } from "@/lib/api-client";
 import { createRewardPoints } from "@/utils/utility-Function";
-import Reward from "./Reward";
 
 const Report = () => {
   const [preview, setPreview] = useState("");
@@ -25,9 +24,11 @@ const Report = () => {
   const [verificationResult, setVerificationResult] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchReports = async () => {
     try {
+      setLoading(true);
       const response = await apiClient.get(GET_REPORT_ROUTE, {
         withCredentials: true,
         // params: {
@@ -45,7 +46,12 @@ const Report = () => {
         }));
         setReports(formattedFetchedReports);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+      toast.error("Failed to fetch reports. Please try again later.");
+    }finally{
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -68,12 +74,14 @@ const Report = () => {
       };
 
       // Create reward for reporting waste
-      const points = createRewardPoints(parseInt(verificationResult.quantity.match(/\d+/)[0]) , 10 , 20);
+      const points = createRewardPoints(
+        parseInt(verificationResult.quantity.match(/\d+/)[0]),
+        10,
+        20
+      );
       const response = await apiClient.post(
         CREATE_REPORT_ROUTE,
-        { report: createdReport,
-          reward: { points:points,name:"report"}
-         },
+        { report: createdReport, reward: { points: points, name: "report" } },
         { withCredentials: true }
       );
       if (response.status === 201) {
@@ -154,7 +162,7 @@ const Report = () => {
         2. An estimate of the quantity or amount (in kg or liters)
         3. Your confidence level in this assessment (as a percentage)
         
-        Respond in JSON format like this:
+        Strictly Respond in JSON format like this:
         {
           "wasteType": "type of waste",
           "quantity": "estimated quantity with unit",
@@ -377,7 +385,11 @@ const Report = () => {
         <h2 className="text-3xl font-semibold mb-6 text-gray-800">
           Recent Reports
         </h2>
-        {reports.length > 0 && reports[0].id ? (
+        {loading ? (
+          <div className="w-full flex justify-center" >
+            <Loader className="animate-spin ml-1 mr-3 h-10 w-10 text-green-500" />
+          </div>
+        ) : reports.length > 0 && reports[0].id ? (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="max-h-96 overflow-y-auto">
               <table className="w-full">
@@ -407,10 +419,14 @@ const Report = () => {
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
-                            {report.location.length>15 ? (report.location.slice(0,15)+"...") : report.location}
+                            {report.location.length > 15
+                              ? report.location.slice(0, 15) + "..."
+                              : report.location}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {report.wasteType.length > 15 ?( report.wasteType.slice(0,15)+"...") : report.wasteType}
+                            {report.wasteType.length > 15
+                              ? report.wasteType.slice(0, 15) + "..."
+                              : report.wasteType}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {report.amount}
@@ -427,7 +443,7 @@ const Report = () => {
           </div>
         ) : (
           <p className="text-gray-500 text-center">
-            You have not reported any Waste Yet{" "}
+            You have not reported any Waste Yet
           </p>
         )}
       </div>

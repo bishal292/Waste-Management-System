@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // Define allowed origins
 const allowedOrigins = [
   "https://waste-management-client-lake.vercel.app",
-  "https://your-other-domain.com",
+  "https://wmsdemo.loca.lt",
   // Add any other domains that need access
 ];
 
