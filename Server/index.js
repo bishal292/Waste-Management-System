@@ -19,42 +19,21 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Define allowed origins
-const allowedOrigins = [
-  "https://waste-management-client-lake.vercel.app",
-  "https://wmsdemo.loca.lt","https://server-nu-ivory-27.vercel.app/*",
-  
-  // Add any other domains that need access
-];
-
-// If CLIENT_URL is defined in environment variables, add it to allowed origins
-if (process.env.CLIENT_URL) {
-  allowedOrigins.push(process.env.CLIENT_URL);
-}
-
-// Add localhost for development
-if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push("http://localhost:3000");
-  allowedOrigins.push("http://localhost:5173");
-}
-
-// CORS middleware with dynamic origin validation
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl requests)
-      if (!origin) return callback(null, true);
+      const allowedOrigins = process.env.CLIENT_URLS
+        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
+        : [];
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log("Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
   })
 );
 
