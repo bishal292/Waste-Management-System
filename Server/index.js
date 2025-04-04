@@ -19,19 +19,26 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       const allowedOrigins = process.env.CLIENT_URLS
+//         ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
+//         : [];
+
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PATCH", "DELETE"],
+//   })
+// );
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = process.env.CLIENT_URLS
-        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
-        : [];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin:'https://waste-management-client-lake.vercel.app/' ,
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
   })
