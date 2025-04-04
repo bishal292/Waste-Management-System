@@ -24,6 +24,7 @@ const Header = ({ onMenuClick }) => {
   const [balance, setBalance] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const { userInfo, setUserInfo } = useAppStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const login = () => {
     navigate("/auth");
@@ -31,6 +32,7 @@ const Header = ({ onMenuClick }) => {
 
   const logout = async () => {
     try {
+      setIsSubmitting(true);
       const response = await apiClient.get(LOGOUT_ROUTE, {
         withCredentials: true,
       });
@@ -43,6 +45,8 @@ const Header = ({ onMenuClick }) => {
     } catch (error) {
       toast.error("Error Logging Out");
       console.error(error);
+    }finally{
+      setIsSubmitting(false);
     }
   };
 
@@ -150,12 +154,13 @@ const Header = ({ onMenuClick }) => {
               {balance}
             </span>
           </div>
-          {userInfo ? (
+          {!!userInfo && userInfo.user ? ( // Ensure userInfo and user exist
             <Button
               onClick={logout}
               className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"
+              disabled={isSubmitting}
             >
-              Logout
+              {isSubmitting ? "submitting..." : "Logout"}
               <LogOut className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5" />
             </Button>
           ) : (

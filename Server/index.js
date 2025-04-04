@@ -22,7 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 // Define allowed origins
 const allowedOrigins = [
   "https://waste-management-client-lake.vercel.app",
-  "https://wmsdemo.loca.lt",
+  "https://wmsdemo.loca.lt","https://server-nu-ivory-27.vercel.app/*",
+  
   // Add any other domains that need access
 ];
 
@@ -73,21 +74,12 @@ app.get("/", (req, res, next) => {
   next();
 });
 
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
-  mongoose
-    .connect(process.env.DB_URL)
-    .then(() => {
-      console.log("Connected to MongoDB");
-      app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error("MongoDB connection error:", err);
-    });
-}
+const PORT = process.env.PORT || 3000;
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch((err) => {
+  console.error("MongoDB connection error:", err);
 });

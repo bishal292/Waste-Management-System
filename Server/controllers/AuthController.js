@@ -30,7 +30,7 @@ export const signup = async (req, res) => {
 
     const user = new User({ email, password, name });
     await user.save();
-    res.cookie("jwt", createToken(user.email, user._id), {
+    res.cookie("wmsjwt", createToken(user.email, user._id), {
       secure: true,
       sameSite: true,
       maxAge,
@@ -54,6 +54,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     await getDBConnection();
+    console.log("Login request received:", req.body); // Debug log
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).send("Email and password are required");
@@ -71,7 +72,7 @@ export const login = async (req, res) => {
       return res.status(401).send("Invalid credentials");
     }
 
-    res.cookie("jwt", createToken(email, user._id), {
+    res.cookie("wmsjwt", createToken(email, user._id), {
       secure: true,
       sameSite: true,
       maxAge,
@@ -93,8 +94,8 @@ export const login = async (req, res) => {
       totalBalance,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).send("Internal Server Error");
+    console.error("Error in login:", error); // Log the error
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -129,7 +130,7 @@ export const getUserInfo = async (req, res) => {
 export const logOut = async (req, res) => {
   try {
     await getDBConnection();
-    res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: true });
+    res.cookie("wmsjwt", "", { maxAge: 1, secure: true, sameSite: true });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {
     console.log(error);

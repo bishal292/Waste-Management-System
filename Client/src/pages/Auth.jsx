@@ -18,6 +18,7 @@ export const Auth = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateLogin = () => {
     if (!email.length) {
@@ -65,6 +66,7 @@ export const Auth = () => {
   // Login function to authenticate the user along with the toast notification for error handling.
   const handleLogin = async () => {
     try {
+      setIsSubmitting(true);
       if (validateLogin()) {
         const res = await apiClient.post(
           LOGIN_ROUTE,
@@ -94,11 +96,14 @@ export const Auth = () => {
         // Something went wrong with the request itself
         toast.error("Network error. Please try again.");
       }
+    }finally{
+      setIsSubmitting(false);
     }
   };
 
   const handleSignup = async () => {
     try {
+      setIsSubmitting(true);
       if (validateSignup()) {
         const res = await apiClient.post(
           SIGNUP_ROUTE,
@@ -121,6 +126,8 @@ export const Auth = () => {
           toast.error("An unknown error occurred");
         }
       }
+    }finally{
+      setIsSubmitting(false);
     }
   };
 
@@ -176,8 +183,8 @@ export const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <Button className="p-6 rounded-full" onClick={handleLogin}>
-                  Login
+                <Button className="p-6 rounded-full" onClick={handleLogin} disabled={isSubmitting}>
+                  {isSubmitting ? "Logging in..." : "Login"}
                 </Button>
               </TabsContent>
 
@@ -211,8 +218,9 @@ export const Auth = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                <Button className="p-6 rounded-full" onClick={handleSignup}>
-                  Sign Up
+                <Button className="p-6 rounded-full" onClick={handleSignup}
+disabled={isSubmitting}>
+                  {isSubmitting ? "Signing up..." : "Sign Up"}
                 </Button>
               </TabsContent>
             </Tabs>
