@@ -32,7 +32,7 @@ export const signup = async (req, res) => {
     await user.save();
     res.cookie("wmsjwt", createToken(user.email, user._id), {
       secure: true,
-      sameSite: true,
+      SameSite: "None",
       maxAge,
     });
 
@@ -74,7 +74,7 @@ export const login = async (req, res) => {
 
     res.cookie("wmsjwt", createToken(email, user._id), {
       secure: true,
-      sameSite: true,
+      SameSite: "None",
       maxAge,
     });
 
@@ -130,7 +130,7 @@ export const getUserInfo = async (req, res) => {
 export const logOut = async (req, res) => {
   try {
     await getDBConnection();
-    res.cookie("wmsjwt", "", { maxAge: 1, secure: true, sameSite: true });
+    res.cookie("wmsjwt", "", { maxAge: 1, secure: true, SameSite:"None" });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {
     console.log(error);
