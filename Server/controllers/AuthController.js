@@ -27,12 +27,12 @@ export const signup = async (req, res) => {
       return res.status(400).send("Password must be atleast 4 characters long");
     }
 
-
     const user = new User({ email, password, name });
     await user.save();
     res.cookie("wmsjwt", createToken(user.email, user._id), {
+      httpOnly: true,
       secure: true,
-      SameSite: "None",
+      sameSite: "None",
       maxAge,
     });
 
@@ -73,8 +73,9 @@ export const login = async (req, res) => {
     }
 
     res.cookie("wmsjwt", createToken(email, user._id), {
+      httpOnly: true,
       secure: true,
-      SameSite: "None",
+      sameSite: "None",
       maxAge,
     });
 
@@ -130,7 +131,12 @@ export const getUserInfo = async (req, res) => {
 export const logOut = async (req, res) => {
   try {
     await getDBConnection();
-    res.cookie("wmsjwt", "", { maxAge: 1, secure: true, SameSite:"None" });
+    res.cookie("wmsjwt", "", {
+      maxAge: 1,
+      httpOnly: true,
+      secure: true,
+      SameSite: "None",
+    });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {
     console.log(error);
