@@ -75,7 +75,7 @@ export const Auth = () => {
         navigate("/");
       }
     } catch (err) {
-      console.error("Error Setting cookie:", err);
+      setCookieError(true);
       throw new Error("Cookie blocked");
     }
   };
