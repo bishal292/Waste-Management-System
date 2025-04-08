@@ -135,7 +135,7 @@ export const logOut = async (req, res) => {
       maxAge: 1,
       httpOnly: true,
       secure: true,
-      SameSite: "None",
+      sameSite: "None",
     });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {

@@ -10,6 +10,7 @@ import { apiClient } from "@/lib/api-client";
 import { SIGNUP_ROUTE, LOGIN_ROUTE } from "@/utils/constant";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/store";
+import CookieWarning from "@/components/CookieWarning";
 
 export const Auth = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cookieError, setCookieError] = useState(true);
 
   const validateLogin = () => {
     if (!email.length) {
@@ -63,6 +65,19 @@ export const Auth = () => {
     return true;
   };
 
+  const handleCookieCheck = async () => {
+    try {
+      const response = await apiClient.get(GET_USER_INFO_ROUTE, {
+        withCredentials: true,
+      });
+      if (response.status === 200 && response.data) {
+        setUserInfo(response.data);
+      }
+    } catch (err) {
+      console.error("Error Setting cookie:", err);
+    }
+  };
+
   // Login function to authenticate the user along with the toast notification for error handling.
   const handleLogin = async () => {
     try {
@@ -75,12 +90,14 @@ export const Auth = () => {
         );
         if (res.status === 200) {
           toast.success("Login Successful");
+          if(!handleCookieCheck()){
+            setCookieError(true);
+          }
           setUserInfo(res.data);
           navigate("/");
         }
       }
     } catch (error) {
-      // Handle error responses
       if (error.response) {
         // The request was made and the server responded with a status code
         const status = error.response.status;
@@ -93,10 +110,9 @@ export const Auth = () => {
           toast.error("An unknown error occurred");
         }
       } else {
-        // Something went wrong with the request itself
         toast.error("Network error. Please try again.");
       }
-    }finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -111,6 +127,9 @@ export const Auth = () => {
           { withCredentials: true }
         );
         if (res.status === 201) {
+          if(!handleCookieCheck()){
+            setCookieError(true);
+          }
           setUserInfo(res.data.user);
           navigate("/");
         }
@@ -126,7 +145,7 @@ export const Auth = () => {
           toast.error("An unknown error occurred");
         }
       }
-    }finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -183,7 +202,11 @@ export const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <Button className="p-6 rounded-full" onClick={handleLogin} disabled={isSubmitting}>
+                <Button
+                  className="p-6 rounded-full"
+                  onClick={handleLogin}
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Logging in..." : "Login"}
                 </Button>
               </TabsContent>
@@ -218,13 +241,28 @@ export const Auth = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                <Button className="p-6 rounded-full" onClick={handleSignup}
-disabled={isSubmitting}>
+                <Button
+                  className="p-6 rounded-full"
+                  onClick={handleSignup}
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Signing up..." : "Sign Up"}
                 </Button>
               </TabsContent>
             </Tabs>
           </div>
+          {cookieError && (
+            <div className="h-full w-full flex items-center justify-center relative z-50">
+              <CookieWarning>
+                <button
+                  className="absolute top-2 right-2 bg-gray-200 rounded-full p-2 hover:bg-gray-300 z-50"
+                  onClick={() => setCookieError(false)}
+                >
+                  ✕
+                </button>
+              </CookieWarning>
+            </div>
+          )}
         </div>
         <div className="items-center justify-center hidden xl:flex">
           <img src={background} alt="Background icon" className="h-[80vh]" />
