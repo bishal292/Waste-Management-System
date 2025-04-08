@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
-import { SIGNUP_ROUTE, LOGIN_ROUTE } from "@/utils/constant";
+import { SIGNUP_ROUTE, LOGIN_ROUTE, GET_USER_INFO_ROUTE } from "@/utils/constant";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store/store";
 import CookieWarning from "@/components/CookieWarning";
@@ -20,7 +20,7 @@ export const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cookieError, setCookieError] = useState(true);
+  const [cookieError, setCookieError] = useState(false);
 
   const validateLogin = () => {
     if (!email.length) {
@@ -72,6 +72,7 @@ export const Auth = () => {
       });
       if (response.status === 200 && response.data) {
         setUserInfo(response.data);
+        navigate("/");
       }
     } catch (err) {
       console.error("Error Setting cookie:", err);
@@ -90,25 +91,12 @@ export const Auth = () => {
         );
         if (res.status === 200) {
           toast.success("Login Successful");
-          if(!handleCookieCheck()){
-            setCookieError(true);
-          }
-          setUserInfo(res.data);
-          navigate("/");
+          await handleCookieCheck();
         }
       }
     } catch (error) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        const status = error.response.status;
-
-        if (status === 404) {
-          toast.error("User not found with given email");
-        } else if (status === 401) {
-          toast.error("Invalid credentials");
-        } else {
-          toast.error("An unknown error occurred");
-        }
+        toast.error(error.response?.data?.message || error.response?.data || error?.message || "An unknown error occurred");
       } else {
         toast.error("Network error. Please try again.");
       }
@@ -127,23 +115,15 @@ export const Auth = () => {
           { withCredentials: true }
         );
         if (res.status === 201) {
-          if(!handleCookieCheck()){
-            setCookieError(true);
-          }
-          setUserInfo(res.data.user);
-          navigate("/");
+          toast.success("Account Created Successfully");
+          await handleCookieCheck();
         }
       }
     } catch (error) {
-      if (error.response.status) {
-        const status = error.response.status;
-        if (status === 400) {
-          toast.error("All fields are required");
-        } else if (status === 409) {
-          toast.error("User already exists with given email");
-        } else {
-          toast.error("An unknown error occurred");
-        }
+      if (error.response) {
+        toast.error(error.response?.data?.message || error.response?.data || error?.message || "An unknown error occurred");
+      } else {
+        toast.error("Network error. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
