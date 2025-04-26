@@ -401,7 +401,7 @@ const Report = () => {
             <Loader className="animate-spin ml-1 mr-3 h-10 w-10 text-green-500" />
           </div>
         ) : reports.length > 0 && reports[0].id ? (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-2 ">
             <div className="max-h-96 overflow-y-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 sticky top-0">

@@ -80,7 +80,7 @@ export default function Home() {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-16 `}>
+    <div className="container mx-auto px-4 pt-16">
       <section className="text-center mb-20 px-4 sm:px-6 lg:px-8">
         <AnimatedGlobe />
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-800 tracking-tight">

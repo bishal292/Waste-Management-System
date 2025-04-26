@@ -185,7 +185,7 @@ const Header = ({ onMenuClick }) => {
           {!!userInfo && userInfo.user ? ( // Ensure userInfo and user exist
             <Button
               onClick={logout}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"
+              className="bg-orange-600 hover:bg-orange-700 text-white text-sm md:text-base"
               disabled={isSubmitting}
             >
               {isSubmitting ? "submitting..." : "Logout"}

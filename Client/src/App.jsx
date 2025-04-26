@@ -17,6 +17,7 @@ import SideBar from "./components/SideBar";
 import LeaderBoard from "./pages/LeaderBoards";
 import Settings from "./pages/Settings";
 import { Loader } from "lucide-react";
+import Footer from "./components/Footer"; // Import Footer component
 
 // Private Route Wrapper
 const PrivateRoutes = ({ children }) => {
@@ -51,8 +52,8 @@ const AuthRoutes = ({ children }) => {
   return userInfo.user ? <Navigate to="/" /> : children;
 };
 
-// Layout Component for Pages with Header & Sidebar
-const HeaderSidebarLayout = ({ children }) => {
+// Layout Component for Pages with Header, Sidebar & Footer
+const HeaderSidebarFooterLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -64,6 +65,7 @@ const HeaderSidebarLayout = ({ children }) => {
           {children}
         </main>
       </div>
+      <Footer /> {/* Add Footer */}
     </div>
   );
 };
@@ -72,18 +74,18 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <HeaderSidebarLayout>
+      <HeaderSidebarFooterLayout>
         <Home />
-      </HeaderSidebarLayout>
+      </HeaderSidebarFooterLayout>
     ),
   },
   {
     path: "/collect",
     element: (
       <PrivateRoutes>
-        <HeaderSidebarLayout>
+        <HeaderSidebarFooterLayout>
           <Collect />
-        </HeaderSidebarLayout>
+        </HeaderSidebarFooterLayout>
       </PrivateRoutes>
     ),
   },
@@ -91,9 +93,9 @@ const router = createBrowserRouter([
     path: "/report",
     element: (
       <PrivateRoutes>
-        <HeaderSidebarLayout>
+        <HeaderSidebarFooterLayout>
           <Report />
-        </HeaderSidebarLayout>
+        </HeaderSidebarFooterLayout>
       </PrivateRoutes>
     ),
   },
@@ -101,9 +103,9 @@ const router = createBrowserRouter([
     path: "/rewards",
     element: (
       <PrivateRoutes>
-        <HeaderSidebarLayout>
+        <HeaderSidebarFooterLayout>
           <Reward />
-        </HeaderSidebarLayout>
+        </HeaderSidebarFooterLayout>
       </PrivateRoutes>
     ),
   },
@@ -111,9 +113,9 @@ const router = createBrowserRouter([
     path: "/leaderboard",
     element: (
       <PrivateRoutes>
-        <HeaderSidebarLayout>
+        <HeaderSidebarFooterLayout>
           <LeaderBoard />
-        </HeaderSidebarLayout>
+        </HeaderSidebarFooterLayout>
       </PrivateRoutes>
     ),
   },
@@ -121,9 +123,9 @@ const router = createBrowserRouter([
     path: "/settings",
     element: (
       <PrivateRoutes>
-        <HeaderSidebarLayout>
+        <HeaderSidebarFooterLayout>
           <Settings />
-        </HeaderSidebarLayout>
+        </HeaderSidebarFooterLayout>
       </PrivateRoutes>
     ),
   },
