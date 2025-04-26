@@ -1,3 +1,4 @@
+import { createRewardPoints } from "../Utils/Util-function.js";
 import { Report, Notifications, Rewards, Transaction } from "../db/Schemas.js";
 import { getDBConnection } from "../db/dbConfig.js";
 
@@ -9,12 +10,21 @@ export const createReport = async (req, res) => {
       return res.status(401).send("You are not Authenticated.");
     }
     console.error(req.body);
-    const { report, reward } = req.body;
-    if (!report || !reward ) return res.status(400).send("All fields are required");
+    const { report } = req.body;
+    if (!report ) return res.status(400).send("All fields are required");
     const { location, type, amount, imageUrl, verificationResult } = report;
-    const {points, name} = reward;
-    if (!location || !type || !amount || !verificationResult || !points || !name)
+    if (!location || !type || !amount || !verificationResult)
       return res.status(400).send("All fields are required");
+    if (amount < 0) return res.status(400).send("Amount can't be negative");
+
+    const points = createRewardPoints(
+      parseInt(verificationResult.quantity.match(/\d+/)[0]),
+      10,
+      20
+    );
+    
+    const name = 'report'
+
     const newReport = await Report.create({
       userId,
       location,
@@ -121,6 +131,30 @@ export const updateReport = async (req, res) => {
         status: updatedReport.status,
         date: updatedReport.createdAt,
         collectorId: updatedReport.collectorId,
+      };
+      const rewardPoints = createRewardPoints(
+        parseInt(formatedReport.amount),
+        20,
+        50
+      );
+      if (status === "Collected") {
+        const name = 'collect';
+        await Rewards.create({
+          userId,
+          points: rewardPoints,
+          desc: `points earned for ${name}ing waste`,
+          name,
+        });
+        await Transaction.create({
+          userId: updatedReport.collectorId,
+          type:"earned_collection",
+          amount: rewardPoints,
+          description: "Points earned for collecting waste"
+        });
+        await Notifications.create({
+          userId: updatedReport.collectorId,
+          message: `You have successfully collected a waste of type ${formatedReport.wasteType}.`,
+        });
       };
       res.status(200).json(formatedReport);
       // }

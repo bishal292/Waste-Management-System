@@ -10,7 +10,6 @@ import {
 } from "@/utils/constant";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { apiClient } from "@/lib/api-client";
-import { createRewardPoints } from "@/utils/utility-Function";
 
 const Report = () => {
   const [preview, setPreview] = useState("");
@@ -75,14 +74,9 @@ const Report = () => {
       };
 
       // Create reward for reporting waste
-      const points = createRewardPoints(
-        parseInt(verificationResult.quantity.match(/\d+/)[0]),
-        10,
-        20
-      );
       const response = await apiClient.post(
         CREATE_REPORT_ROUTE,
-        { report: createdReport, reward: { points: points, name: "report" } },
+        { report: createdReport},
         { withCredentials: true }
       );
       if (response.status === 201) {
@@ -409,25 +403,25 @@ const Report = () => {
           </div>
         ) : reports.length > 0 && reports[0].id ? (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="max-h-[400px] overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 sticky top-0 z-10">
+            <div className="max-h-96 overflow-y-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Location
                     </th>
-                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 text-xs sm:text-sm">
+                <tbody className="divide-y divide-gray-200">
                   {reports.map(
                     (report) =>
                       report.id && (
@@ -435,22 +429,21 @@ const Report = () => {
                           key={report.id}
                           className="hover:bg-gray-50 transition-colors duration-200"
                         >
-                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[150px] truncate">
-                            <div className="flex items-center">
-                              <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
-                              {report.location}
-                            </div>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
+                            {report.location.length > 15
+                              ? report.location.slice(0, 15) + "..."
+                              : report.location}
                           </td>
-                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[120px] truncate">
-                            {report.wasteType}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {report.wasteType.length > 15
+                              ? report.wasteType.slice(0, 15) + "..."
+                              : report.wasteType}
                           </td>
-                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[100px] truncate">
-                            {report.amount.replace(
-                              new RegExp("approximately", "i"),
-                              "Approx."
-                            )}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {report.amount}
                           </td>
-                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[140px] truncate">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {report.createdAt}
                           </td>
                         </tr>

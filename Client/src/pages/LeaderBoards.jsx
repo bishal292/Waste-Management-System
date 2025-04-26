@@ -21,7 +21,7 @@ const LeaderBoard = () => {
   }, []);
 
   return (
-    <div className="">
+    <div className="box-border ">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800">
           Leaderboard

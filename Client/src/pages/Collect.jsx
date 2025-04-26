@@ -17,12 +17,10 @@ import { apiClient } from "@/lib/api-client";
 import {
   Gemini_Api_key,
   GET_REPORTS_TO_COLLECT,
-  SET_REWARD_ROUTE,
   UPDATE_REPORT_STATUS,
 } from "@/utils/constant";
 import { toast } from "sonner";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createRewardPoints } from "@/utils/utility-Function";
 
 // Utility function component to Style Status Badge for Reports.
 function StatusBadge({ status }) {
@@ -174,8 +172,8 @@ const Collect = () => {
       ];
 
       const prompt = `You are an expert in waste management and recycling. Analyze this image and provide:
-      1. Confirm if the waste type matches it is required to be same: ${selectedTask.wasteType}
-      2. Estimate if the quantity matches, ignore some minor difference with compared to: ${selectedTask.amount}
+      1. Confirm if the waste type matches Strictly : "${selectedTask.wasteType}"
+      2. Estimate if the quantity matches, ignore some minor difference and don't be too strict with compared to: "${selectedTask.amount}"
       3. Your confidence level in this assessment (as a percentage)
 
       Respond strictly in JSON format without any additional text or explanation:
@@ -206,27 +204,6 @@ const Collect = () => {
         );
 
         if (response.status === 200 && response.data) {
-          const points = createRewardPoints(
-            parseInt(selectedTask.amount),
-            20,
-            50
-          ); // For collection reward point ranges between 20 -50 based on waste collection.
-          const rewardResponse = await apiClient.post(
-            SET_REWARD_ROUTE,
-            { points, name: "collect" },
-            { withCredentials: true }
-          );
-
-          if (rewardResponse.status === 201) {
-            toast.success(
-              `Verification successful! You earned ${points} reward points!`
-            );
-          } else {
-            toast.error(
-              "Verification success but failed to save reward points."
-            );
-          }
-
           const newUpdatedReport = response.data;
           newUpdatedReport.date = newUpdatedReport.date.split("T")[0];
           setReports((prev) =>
@@ -240,21 +217,21 @@ const Collect = () => {
           setVerificationStatus("success");
           setSelectedTask(null); // Close the popup
           setVerificationImage(null); // Clear the uploaded image
-          return; // Exit the function after successful verification
-        } else {
-          toast.error("Internal Server Error. Failed to update task status.");
+          return;
         }
       } else {
         toast.error(
           "Verification failed. The collected waste does not match the reported waste."
         );
+        setVerificationStatus("failure");
       }
     } catch (error) {
+      toast.error(error?.message || error?.response?.data?.message || error?.response?.data || "An error occurred during verification.");
       console.error("Error verifying waste:", error);
+      setVerificationStatus("failure");
     }
 
     // Set failure status if any error occurs or verification fails
-    setVerificationStatus("failure");
   };
 
   return (
@@ -496,8 +473,9 @@ const Collect = () => {
               onClick={() => setSelectedTask(null)}
               variant="outline"
               className="w-full mt-2"
+              disabled={verificationStatus === "verifying"}
             >
-              Close
+              {verificationStatus === "verifying" ? (<><Loader /> Wait </>):("Close") }
             </Button>
           </div>
         </div>
