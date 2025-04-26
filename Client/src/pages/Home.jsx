@@ -84,7 +84,7 @@ export default function Home() {
       <section className="text-center mb-20 px-4 sm:px-6 lg:px-8">
         <AnimatedGlobe />
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-800 tracking-tight">
-          Zero-to-Hero <span className="text-green-600">Waste Management</span>
+        WasteNest <span className="text-green-600">Waste Management</span>
         </h1>
         <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
           Join our community in making waste management more efficient and
