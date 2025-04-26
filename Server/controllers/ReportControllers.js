@@ -11,7 +11,7 @@ export const createReport = async (req, res) => {
     }
     console.error(req.body);
     const { report } = req.body;
-    if (!report ) return res.status(400).send("All fields are required");
+    if (!report) return res.status(400).send("All fields are required");
     const { location, type, amount, imageUrl, verificationResult } = report;
     if (!location || !type || !amount || !verificationResult)
       return res.status(400).send("All fields are required");
@@ -22,8 +22,8 @@ export const createReport = async (req, res) => {
       10,
       20
     );
-    
-    const name = 'report'
+
+    const name = "report";
 
     const newReport = await Report.create({
       userId,
@@ -37,18 +37,18 @@ export const createReport = async (req, res) => {
       userId,
       points,
       desc: "points Earned for reporting waste",
-      name
+      name,
     });
     await Transaction.create({
       userId,
-      type:"earned_report",
+      type: "earned_report",
       amount: points,
-      description: "Points earned for reporting waste"
+      description: "Points earned for reporting waste",
     });
     await Notifications.create({
       userId,
       message: `You have successfully reported a waste of type ${type}.`,
-    })
+    });
     res.status(201).json(newReport);
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -77,11 +77,26 @@ export const getRecentReports = async (req, res) => {
             status: 1,
             date: "$createdAt",
             collectorId: 1,
+            statusOrder: {
+              $switch: {
+                branches: [
+                  { case: { $eq: ["$status", "Pending"] }, then: 1 },
+                  { case: { $eq: ["$status", "in_progress"] }, then: 2 },
+                  { case: { $eq: ["$status", "collected"] }, then: 3 },
+                ],
+                default: 4,
+              },
+            },
           },
         },
-        { $sort: { date: -1 } }, // Sort by createdAt in descending order
-        { $skip: parseInt(skip) || 0 }, // Default to 0 if skip is not provided
-        { $limit: parseInt(limit) || 10 }, // Default to 10 if limit is not provided
+        {
+          $sort: {
+            statusOrder: 1,
+            date: -1,
+          },
+        },
+        { $skip: parseInt(skip) || 0 },
+        { $limit: parseInt(limit) || 10 },
       ]);
 
       const totalReports = await Report.countDocuments();
@@ -109,7 +124,11 @@ export const updateReport = async (req, res) => {
     try {
       const updatedReport = await Report.findByIdAndUpdate(
         reportId,
-        { status, collectorId: status === "Pending" ? null : userId , collectionDate: status === "Collected" ? new Date() : null },
+        {
+          status,
+          collectorId: status === "Pending" ? null : userId,
+          collectionDate: status === "Collected" ? new Date() : null,
+        },
         {
           new: true,
           projection: {
@@ -138,7 +157,7 @@ export const updateReport = async (req, res) => {
         50
       );
       if (status === "Collected") {
-        const name = 'collect';
+        const name = "collect";
         await Rewards.create({
           userId,
           points: rewardPoints,
@@ -147,15 +166,15 @@ export const updateReport = async (req, res) => {
         });
         await Transaction.create({
           userId: updatedReport.collectorId,
-          type:"earned_collect",
+          type: "earned_collect",
           amount: rewardPoints,
-          description: "Points earned for collecting waste"
+          description: "Points earned for collecting waste",
         });
         await Notifications.create({
           userId: updatedReport.collectorId,
           message: `You have successfully collected a waste of type ${formatedReport.wasteType}.`,
         });
-      };
+      }
       res.status(200).json(formatedReport);
       // }
     } catch (error) {
