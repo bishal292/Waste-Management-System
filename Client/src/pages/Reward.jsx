@@ -23,8 +23,8 @@ const Reward = () => {
   const [transactions, setTransactions] = useState([]);
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // -> when redeeming all points.
+  const [isRedeeming, setIsRedeeming] = useState(false); // -> when redeeming a single reward.
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -60,17 +60,15 @@ const Reward = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const toatalpoints = balance;
-      const response = await apiClient.patch(
+      const response = await apiClient.get(
         REDEEM_ALL_REWARD_ROUTE,
-        { points: toatalpoints },
         { withCredentials: true }
       );
-      if (response.status === 200 && response.data) {
+      if (response.status === 200) {
         setTransactions((prevTransactions) => [
           {
             _id: "fjd9w8ef98bsib",
-            amount: -toatalpoints,
+            amount: -balance,
             date: new Date().toISOString().split("T")[0],
             description: "Redeemed all Points.",
             type: "redeemed_reward",
@@ -78,9 +76,9 @@ const Reward = () => {
           },
           ...prevTransactions,
         ]);
-        setRewards((prevRewards) =>
-          prevRewards.filter((reward) => reward._id !== response.data._id)
-        );
+        setRewards([]);
+        setBalance(0);
+        toast.success("All Points Redeemed Successfully");
       }
     } catch (error) {
       console.error("Error redeeming points:", error);
@@ -98,11 +96,12 @@ const Reward = () => {
         { rewardId },
         { withCredentials: true }
       );
-      if (response.status === 200 && response.data) {
+      if (response.status === 200) {
+        const prevPoint = rewards.find((reward) => reward._id === rewardId).points
         setTransactions((prevTransactions) => [
           {
             _id: rewardId,
-            amount: rewards.find((reward) => reward._id === rewardId).points,
+            amount: -prevPoint,
             date: new Date().toISOString().split("T")[0],
             description: "Redeemed Points.",
             type: "redeemed_reward",
@@ -110,13 +109,15 @@ const Reward = () => {
           },
           ...prevTransactions,
         ]);
+        setBalance(balance - prevPoint);
         setRewards((prevRewards) =>
           prevRewards.filter((reward) => reward._id !== rewardId)
         );
+        toast.success("Reward Redeemed Successfully");
       }
     } catch (error) {
       console.error("Error redeeming reward:", error);
-      toast.error("Error Redeemin Reward");
+      toast.error("Error Redeeming Reward");
     } finally {
       setIsRedeeming(false);
     }
@@ -154,7 +155,7 @@ const Reward = () => {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
             Recent Transactions
           </h2>
-          <div className="bg-white rounded-xl shadow-md overflow-x-hidden h-[250px]">
+          <div className="bg-white rounded-xl shadow-md overflow-x-hidden h-[400px]">
             {transactions.length > 0 ? (
               transactions.map((transaction) => (
                 <div
@@ -202,13 +203,13 @@ const Reward = () => {
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">
             Available Rewards
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto h-[400px]">
             {rewards.length > 2 && (
               <div className="space-y-2">
                 <Button
                   onClick={handleRedeemAllPoints}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white"
-                  disabled={balance === 0 || isSubmitting}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  disabled={balance === 0 || isSubmitting || isRedeeming}
                 >
                   {isSubmitting ? (
                     <>

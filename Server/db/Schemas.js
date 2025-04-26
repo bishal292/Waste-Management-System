@@ -37,21 +37,6 @@ const rewardSchema = mongoose.Schema({
   name: { type: String, required: true, maxlength: 255 },
 });
 
-// const collectedWasteSchema = mongoose.Schema({
-//   reportId: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Report",
-//     required: true,
-//   },
-//   collectorId: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "User",
-//     required: true,
-//   },
-//   collectionDate: { type: Date, required: true },
-//   status: { type: String, default: "Collected", required: true },
-// });
-
 const notificationSchema = mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   message: { type: String, required: true },

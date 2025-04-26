@@ -114,7 +114,6 @@ export const getUserInfo = async (req, res) => {
     const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
     res.status(200).json({
       user: { id: userData._id, email: userData.email, name: userData.name },
-      // notification: Array.from(notification),
       notification: unreadNotification,
       totalBalance: totalPoints,
     });

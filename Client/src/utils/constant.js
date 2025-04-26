@@ -21,10 +21,9 @@ export const COLLECT_WASTE_ROUTE = `${COLLECT_WASTE}/collect-waste`;
 const USER_ROUTE = "/api/user";
 export const REDEEM_REWARD_ROUTE = `${USER_ROUTE}/redeem-reward`;
 export const REDEEM_ALL_REWARD_ROUTE = `${USER_ROUTE}/redeem-all-rewards`;
-export const SET_REWARD_ROUTE = `${USER_ROUTE}/set-reward`;
 export const FETCH_TRANSACTIONS_REWARD_ROUTE = `${USER_ROUTE}/get-transactions-reward`;
-export const SET_NOTIFICATION_ROUTE = `${USER_ROUTE}/set-notification`;
 export const MARK_NOTIFICATION_READ_ROUTE = `${USER_ROUTE}/mark-notification-read`;
+export const MARK_ALL_NOTIFICATION_READ_ROUTE = `${USER_ROUTE}/mark-all-notification-read`;
 
 export const IMPACT_DATA_ROUTE = "/api/impact-data"
 export const LEADERBOARD_DATA_ROUTE = "/api/leaderboard-data"

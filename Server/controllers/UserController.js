@@ -91,7 +91,7 @@ export const redeemReward = async (req, res) => {
     if (reward.isAvailable === false) {
       return res.status(400).send("Reward Already Redeemed");
     }
-    if (reward.userId !== userId) {
+    if (reward.userId.toString() !== userId) {
       return res.status(401).send("You are not Authorized to redeem this reward.");
     }
     await Rewards.findByIdAndUpdate(rewardId, { isAvailable: false });
@@ -120,7 +120,14 @@ export const redeemAllRewards = async (req, res) => {
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
     }
-    const {points} = req.body;
+    const rewards = await Rewards.find({ userId, isAvailable: true });
+    if (rewards.length === 0) {
+      return res.status(400).send("No Rewards Available to Redeem.");
+    }
+    const points = rewards.reduce((acc, reward) => acc + reward.points, 0);
+
+    console.log("Total Points to Redeem:", points);
+    
     await Rewards.updateMany(
       { userId, isAvailable: true },
       { $set: { isAvailable: false } }

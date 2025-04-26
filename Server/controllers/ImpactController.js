@@ -11,7 +11,7 @@ export const impactController = async (req, res) => {
     const totalWasteData = await Report.aggregate([
       {
         $match: {
-          status: "verified" || "Verified" || "VERIFIED",
+          status: { $in: ["collected", "Collected"] },
           collectorId: { $exists: true, $ne: null },
         },
       },
@@ -20,26 +20,31 @@ export const impactController = async (req, res) => {
           numericAmount: {
             $convert: {
               input: {
-                $trim: {
-                  input: "$amount",
-                  chars:
-                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ",
-                },
+                $getField: {
+                  field: "match",
+                  input: {
+                    $regexFind: {
+                      input: { $toString: "$amount" },
+                      regex: /\d+(\.\d+)?/
+                    }
+                  }
+                }
               },
               to: "double",
               onError: 0,
               onNull: 0,
-            },
-          },
-        },
+            }
+          }
+        }
       },
       {
         $group: {
           _id: null,
           totalWaste: { $sum: "$numericAmount" },
         },
-      },
+      }
     ]);
+    
     
     const totalWasteCollected = totalWasteData[0]?.totalWaste || 0;
 

@@ -19,7 +19,6 @@ const Report = () => {
     type: "",
     amount: "",
   });
-  const [hoveredWasteType, setHoveredWasteType] = useState(null);
   const [verificationStatus, setVerificationStatus] = useState();
   const [verificationResult, setVerificationResult] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,9 +152,9 @@ const Report = () => {
       ];
 
       const prompt = `You are an expert in waste management and recycling. Analyze this image and provide:
-        1. The type of waste (e.g., plastic, paper, glass, metal, organic)
-        2. An estimate of the quantity or amount (in kg or liters)
-        3. Your confidence level in this assessment (as a percentage)
+        1. The type of waste (e.g., plastic, paper, glass, metal, organic).
+        2. An estimate of the quantity or amount (Strictly in kg or liters).
+        3. Your confidence level in this assessment (as a percentage).
         
         Strictly Respond in JSON format like this:
         {
@@ -429,19 +428,21 @@ const Report = () => {
                           key={report.id}
                           className="hover:bg-gray-50 transition-colors duration-200"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={report.location} >
                             <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
                             {report.location.length > 15
                               ? report.location.slice(0, 15) + "..."
                               : report.location}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={report.wasteType}>
                             {report.wasteType.length > 15
                               ? report.wasteType.slice(0, 15) + "..."
                               : report.wasteType}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {report.amount}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={report.amount}>
+                            {report.amount.length > 15
+                              ? report.amount.slice(0, 15) + "..."
+                              : report.amount}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {report.createdAt}

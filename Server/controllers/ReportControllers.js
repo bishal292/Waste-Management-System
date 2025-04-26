@@ -18,7 +18,7 @@ export const createReport = async (req, res) => {
     if (amount < 0) return res.status(400).send("Amount can't be negative");
 
     const points = createRewardPoints(
-      parseInt(verificationResult.quantity.match(/\d+/)[0]),
+      parseFloat(report.amount?.replace(/[^\d.]/g, "")),
       10,
       20
     );
@@ -133,7 +133,7 @@ export const updateReport = async (req, res) => {
         collectorId: updatedReport.collectorId,
       };
       const rewardPoints = createRewardPoints(
-        parseInt(formatedReport.amount),
+        parseFloat(formatedReport.amount?.replace(/[^\d.]/g, "")),
         20,
         50
       );
@@ -147,7 +147,7 @@ export const updateReport = async (req, res) => {
         });
         await Transaction.create({
           userId: updatedReport.collectorId,
-          type:"earned_collection",
+          type:"earned_collect",
           amount: rewardPoints,
           description: "Points earned for collecting waste"
         });

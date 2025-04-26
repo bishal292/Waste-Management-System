@@ -13,6 +13,7 @@ import { apiClient } from "@/lib/api-client";
 import {
   GET_USER_INFO_ROUTE,
   LOGOUT_ROUTE,
+  MARK_ALL_NOTIFICATION_READ_ROUTE,
   MARK_NOTIFICATION_READ_ROUTE,
 } from "@/utils/constant";
 import { toast } from "sonner";
@@ -45,7 +46,7 @@ const Header = ({ onMenuClick }) => {
     } catch (error) {
       toast.error("Error Logging Out");
       console.error(error);
-    }finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -62,7 +63,7 @@ const Header = ({ onMenuClick }) => {
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
-    }, 60000);
+    }, 60000); // 1 minute interval
     return () => {
       clearInterval(interval);
     };
@@ -72,11 +73,11 @@ const Header = ({ onMenuClick }) => {
     try {
       const response = await apiClient.patch(
         MARK_NOTIFICATION_READ_ROUTE,
-        { notificationId:notificationId },
+        { notificationId: notificationId },
         { withCredentials: true }
       );
       if (response.status === 200) {
-        setNotifications(notifications.filter((n) => n.id !== notificationId));
+        setNotifications(notifications.filter((n) => n._id !== notificationId));
       }
     } catch (error) {
       toast.error("Some Error Occured");
@@ -84,6 +85,20 @@ const Header = ({ onMenuClick }) => {
     }
   }
 
+  async function markAllNotificationAsRead() {
+    try {
+      const response = await apiClient.get(MARK_ALL_NOTIFICATION_READ_ROUTE, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        setNotifications([]);
+        toast.success("All Notifications Marked as Read");
+      }
+    } catch (error) {
+      toast.error("Some Error Occured");
+      console.error("Error marking all notifications as read:", error);      
+    }
+  }
   useEffect(() => {
     if (userInfo) {
       setBalance(userInfo.totalBalance);
@@ -110,7 +125,7 @@ const Header = ({ onMenuClick }) => {
                 WMS
               </span>
               <span className="text-[8px] md:text-[10px] text-gray-500 -mt-1">
-                @PU -PIT ASMP_19
+                @Waste Management System
               </span>
             </div>
           </Link>
@@ -127,24 +142,37 @@ const Header = ({ onMenuClick }) => {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuContent align="end" className="w-72 ">
               {notifications && notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <DropdownMenuItem
-                    key={notification._id}
-                    onClick={() => handleNotificationClick(notification._id)}
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-sm text-gray-500">
-                        {notification.message}
-                      </span>
+                <div className="flex flex-col max-h-96 overflow-y-auto">
+                  {notifications.length > 2 && (
+                    <div className="flex justify-end p-2">
+                      <button
+                        onClick={markAllNotificationAsRead}
+                        className="text-xs text-blue-500 font-semibold hover:underline"
+                      >
+                        Mark all as read
+                      </button>
                     </div>
-                  </DropdownMenuItem>
-                ))
+                  )}
+                  {notifications.map((notification) => (
+                    <DropdownMenuItem
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification._id)}
+                      className="flex items-start gap-2 p-2 hover:bg-muted transition"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-500 line-clamp-2">
+                          {notification.message}
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
               ) : (
-                <DropdownMenuItem>
+                <div className="p-4 text-center text-sm text-muted-foreground">
                   No new notifications
-                </DropdownMenuItem>
+                </div>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
