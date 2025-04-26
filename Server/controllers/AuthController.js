@@ -20,7 +20,6 @@ export const signup = async (req, res) => {
 
     const checkUser = await User.findOne({ email });
     if (checkUser) {
-      console.log(`Email already exists`);
       return res.status(409).send("User with email Already exists");
     }
     if (password.length < 4) {
@@ -46,7 +45,7 @@ export const signup = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).send("Internal Server Error");
   }
 };
@@ -54,7 +53,6 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     await getDBConnection();
-    console.log("Login request received:", req.body); // Debug log
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).send("Email and password are required");
@@ -62,13 +60,11 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log(`User Not found`);
       return res.status(404).send("User not found");
     }
     const auth = await compare(password, user.password);
 
     if (!auth) {
-      console.log(`Invalid credentials`);
       return res.status(401).send("Invalid credentials");
     }
 
@@ -123,7 +119,7 @@ export const getUserInfo = async (req, res) => {
       totalBalance: totalPoints,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).send("Internal Server Error");
   }
 };
@@ -139,7 +135,7 @@ export const logOut = async (req, res) => {
     });
     res.status(200).send("Logged Out Successfully");
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).send("Internal Server Error");
   }
 };

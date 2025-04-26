@@ -22,9 +22,9 @@ const LeaderBoard = () => {
 
   return (
     <div className="">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">
-          Leaderboard{" "}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800">
+          Leaderboard
         </h1>
 
         {loading ? (
@@ -33,27 +33,27 @@ const LeaderBoard = () => {
           </div>
         ) : (
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 sm:p-6">
               <div className="flex justify-between items-center text-white">
-                <Trophy className="h-10 w-10" />
-                <span className="text-2xl font-bold">Top Performers</span>
-                <Award className="h-10 w-10" />
+                <Trophy className="h-8 sm:h-10 w-8 sm:w-10" />
+                <span className="text-lg sm:text-2xl font-bold">Top Performers</span>
+                <Award className="h-8 sm:h-10 w-8 sm:w-10" />
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-sm">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Rank
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Points
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Level
                     </th>
                   </tr>
@@ -66,11 +66,11 @@ const LeaderBoard = () => {
                         reward.userInfo._id && userInfo._id === reward.userId ? "bg-indigo-50" : ""
                       } hover:bg-gray-50 transition-colors duration-150 ease-in-out`}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {index < 3 ? (
                             <Crown
-                              className={`h-6 w-6 ${
+                              className={`h-5 sm:h-6 w-5 sm:w-6 ${
                                 index === 0
                                   ? "text-yellow-400"
                                   : index === 1
@@ -85,9 +85,9 @@ const LeaderBoard = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
+                          <div className="flex-shrink-0 h-8 sm:h-10 w-8 sm:w-10">
                             <User className="h-full w-full rounded-full bg-gray-200 text-gray-500 p-2" />
                           </div>
                           <div className="ml-4">
@@ -97,16 +97,16 @@ const LeaderBoard = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <Award className="h-5 w-5 text-indigo-500 mr-2" />
+                          <Award className="h-4 sm:h-5 w-4 sm:w-5 text-indigo-500 mr-2" />
                           <div className="text-sm font-semibold text-gray-900">
                             {reward.points}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 sm:px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
                           Level {reward.level}
                         </span>
                       </td>

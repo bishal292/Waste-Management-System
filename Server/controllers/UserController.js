@@ -46,8 +46,8 @@ export const setReward = async (req, res) => {
     await reward.save();
     res.status(201).send("Reward Set Successfully");
   } catch (error) {
+    console.error("Some Error Occured", error);
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
   }
 };
 
@@ -66,8 +66,8 @@ export const getTransactionAndRewards = async (req, res) => {
 
     res.status(200).json({ transactions, rewards });
   } catch (error) {
+    console.error("Some Error Occured", error);
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
   }
 };
 
@@ -83,16 +83,17 @@ export const redeemReward = async (req, res) => {
     if (!rewardId) {
       return res.status(400).send("Please provide all the details.");
     }
-    const reward = await Rewards.findByIdAndUpdate(
-      rewardId,
-      {
-        isAvailable: false,
-      },
-      { new: true }
-    );
+    const reward = await Rewards.findById(rewardId);
     if (!reward) {
       return res.status(404).send("Reward Not Found");
     }
+    if (reward.isAvailable === false) {
+      return res.status(400).send("Reward Already Redeemed");
+    }
+    if (reward.userId !== userId) {
+      return res.status(401).send("You are not Authorized to redeem this reward.");
+    }
+    await Rewards.findByIdAndUpdate(rewardId, { isAvailable: false });
     await Transaction.create({
       userId,
       type: "redeemed_reward",
@@ -106,8 +107,8 @@ export const redeemReward = async (req, res) => {
     await notification.save();
     res.status(200).send("Reward Redeemed Successfully");
   } catch (error) {
+    console.error("Some Error Occured", error);
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
   }
 };
 
@@ -138,8 +139,8 @@ export const redeemAllRewards = async (req, res) => {
       res.status(200).send("All Rewards Redeemed Successfully");
     });
   } catch (error) {
+    console.error("Some Error Occured", error);
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
   }
 };
 // to respond all the reports reported by the user.
@@ -165,8 +166,8 @@ export const getReports = async (req, res) => {
       res.status(200).json(reports);
     }
   } catch (error) {
+    console.error("Some Error Occured", error);
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
   }
 };
 
@@ -190,4 +191,19 @@ export const markNotificationRead = async (req, res) => {
       .status(200)
       .json({ msg: "Notification Marked as Read", updatedNotification });
   } catch (error) {}
+};
+
+export const markAllNotificationRead = async (req, res) => {
+  try {
+    await getDBConnection();
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).send("You are not Authenticated.");
+    }
+    await Notifications.updateMany({ userId }, { isRead: true });
+    res.status(200).send("All Notifications Marked as Read");
+  } catch (error) {
+    console.error("Some Error Occured", error);
+    res.status(500).send("Internal Server Error");
+  }
 };

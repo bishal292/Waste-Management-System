@@ -58,7 +58,7 @@ export const impactController = async (req, res) => {
       co2Offset: Math.round(co2Offset * 10) / 10, // Round to 1 decimal place
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -126,6 +126,6 @@ export const getLeaderBoard = async (req, res) => {
     // Send result to frontend
     res.json(formattedResult);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };

@@ -8,7 +8,7 @@ export const createReport = async (req, res) => {
     if (!userId) {
       return res.status(401).send("You are not Authenticated.");
     }
-    console.log(req.body);
+    console.error(req.body);
     const { report, reward } = req.body;
     if (!report || !reward ) return res.status(400).send("All fields are required");
     const { location, type, amount, imageUrl, verificationResult } = report;
@@ -42,7 +42,7 @@ export const createReport = async (req, res) => {
     res.status(201).json(newReport);
   } catch (error) {
     res.status(500).send("Internal Server Error");
-    console.log("Some Error Occured", error);
+    console.error("Some Error Occured", error);
   }
 };
 
@@ -81,7 +81,7 @@ export const getRecentReports = async (req, res) => {
     // Only runs if `skip` or `limit` are missing
     return res.status(400).send("Skip and Limit are required");
   } catch (error) {
-    console.log("Some Error Occurred:", error);
+    console.error("Some Error Occurred:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -125,11 +125,11 @@ export const updateReport = async (req, res) => {
       res.status(200).json(formatedReport);
       // }
     } catch (error) {
-      console.log("Some Error Occurred:", error);
+      console.error("Some Error Occurred:", error);
       res.status(500).send("Internal Server Error");
     }
   } catch (error) {
-    console.log("Some Error Occurred:", error);
+    console.error("Some Error Occurred:", error);
     res.status(500).send("Internal Server Error");
   }
 };

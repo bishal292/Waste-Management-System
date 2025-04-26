@@ -154,14 +154,10 @@ function App() {
           withCredentials: true,
         });
         if (res.status === 200 && res.data) {
-          console.log("Response", res);
-          console.log("Data : ", res.data);
-          console.log("User: ", res.data.user);
-          console.log("Notification : ", res.data.notification);
           setUserInfo(res.data);
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setUserInfo({});
       } finally {
         setLoading(false);

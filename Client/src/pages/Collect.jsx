@@ -192,7 +192,6 @@ const Collect = () => {
       text = text.replace(/```json|```/g, "").trim();
 
       const parsedResult = JSON.parse(text); // Parse the sanitized JSON
-      console.log("Parsed result:", parsedResult);
       setVerificationResult({ ...parsedResult });
 
       if (

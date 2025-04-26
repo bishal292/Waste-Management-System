@@ -15,6 +15,7 @@ import {
   REDEEM_REWARD_ROUTE,
 } from "@/utils/constant";
 import { apiClient } from "@/lib/api-client";
+import { toast } from "sonner";
 
 const Reward = () => {
   const { userInfo } = useAppStore();
@@ -22,6 +23,8 @@ const Reward = () => {
   const [transactions, setTransactions] = useState([]);
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedeeming, setIsRedeeming] = useState(false);
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -40,7 +43,7 @@ const Reward = () => {
         }
       } catch (error) {
         console.error(error);
-      }finally{
+      } finally {
         setLoading(false);
       }
     };
@@ -54,47 +57,68 @@ const Reward = () => {
   }, [userInfo]);
 
   const handleRedeemAllPoints = async () => {
-    const toatalpoints = balance;
-    const response = await apiClient.patch(REDEEM_ALL_REWARD_ROUTE,{points:toatalpoints},{withCredentials:true});
-    if (response.status === 200 && response.data) {
-      setTransactions((prevTransactions) => [
-        {
-          _id:"fjd9w8ef98bsib",
-          amount: -toatalpoints,
-          date: new Date().toISOString().split("T")[0],
-          description: "Redeemed all Points.",
-          type: "redeemed_reward",
-          userId: userInfo.id,
-        },
-        ...prevTransactions,
-      ]);
-      setRewards((prevRewards) =>
-        prevRewards.filter((reward) => reward._id !== response.data._id)
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const toatalpoints = balance;
+      const response = await apiClient.patch(
+        REDEEM_ALL_REWARD_ROUTE,
+        { points: toatalpoints },
+        { withCredentials: true }
       );
+      if (response.status === 200 && response.data) {
+        setTransactions((prevTransactions) => [
+          {
+            _id: "fjd9w8ef98bsib",
+            amount: -toatalpoints,
+            date: new Date().toISOString().split("T")[0],
+            description: "Redeemed all Points.",
+            type: "redeemed_reward",
+            userId: userInfo.id,
+          },
+          ...prevTransactions,
+        ]);
+        setRewards((prevRewards) =>
+          prevRewards.filter((reward) => reward._id !== response.data._id)
+        );
+      }
+    } catch (error) {
+      console.error("Error redeeming points:", error);
+      toast.error("Error Redeemin Points");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleRedeemReward = async (rewardId) => {
-    const response = await apiClient.patch(
-      REDEEM_REWARD_ROUTE,
-      { rewardId },
-      { withCredentials: true }
-    );
-    if (response.status === 200 && response.data) {
-      setTransactions((prevTransactions) => [
-        {
-          _id: rewardId,
-          amount: rewards.find((reward) => reward._id === rewardId).points,
-          date: new Date().toISOString().split("T")[0],
-          description: "Redeemed Points.",
-          type: "redeemed_reward",
-          userId: userInfo.id,
-        },
-        ...prevTransactions,
-      ]);
-      setRewards((prevRewards) =>
-        prevRewards.filter((reward) => reward._id !== rewardId)
+    setIsRedeeming(true);
+    try {
+      const response = await apiClient.patch(
+        REDEEM_REWARD_ROUTE,
+        { rewardId },
+        { withCredentials: true }
       );
+      if (response.status === 200 && response.data) {
+        setTransactions((prevTransactions) => [
+          {
+            _id: rewardId,
+            amount: rewards.find((reward) => reward._id === rewardId).points,
+            date: new Date().toISOString().split("T")[0],
+            description: "Redeemed Points.",
+            type: "redeemed_reward",
+            userId: userInfo.id,
+          },
+          ...prevTransactions,
+        ]);
+        setRewards((prevRewards) =>
+          prevRewards.filter((reward) => reward._id !== rewardId)
+        );
+      }
+    } catch (error) {
+      console.error("Error redeeming reward:", error);
+      toast.error("Error Redeemin Reward");
+    } finally {
+      setIsRedeeming(false);
     }
   };
 
@@ -184,10 +208,19 @@ const Reward = () => {
                 <Button
                   onClick={handleRedeemAllPoints}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
-                  disabled={balance === 0}
+                  disabled={balance === 0 || isSubmitting}
                 >
-                  <Gift className="w-4 h-4 mr-2" />
-                  Redeem All Points
+                  {isSubmitting ? (
+                    <>
+                      <Loader />
+                      <span className="ml-2">Redeeming...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Gift className="w-4 h-4 mr-2" />
+                      Redeem All Points
+                    </>
+                  )}
                 </Button>
               </div>
             )}
@@ -213,10 +246,19 @@ const Reward = () => {
                     <Button
                       onClick={() => handleRedeemReward(reward._id)}
                       className="w-full bg-green-500 hover:bg-green-600 text-white"
-                      disabled={balance < reward.cost}
+                      disabled={balance < reward.cost || isSubmitting || isRedeeming}
                     >
-                      <Gift className="w-4 h-4 mr-2" />
-                      Redeem Reward
+                      {isRedeeming ? (
+                        <>
+                          <Loader />
+                          <span className="ml-2">Redeeming...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="w-4 h-4 mr-2" />
+                          Reedeem Reward
+                        </>
+                      )}
                     </Button>
                   </div>
                 ))}

@@ -20,6 +20,7 @@ const Report = () => {
     type: "",
     amount: "",
   });
+  const [hoveredWasteType, setHoveredWasteType] = useState(null);
   const [verificationStatus, setVerificationStatus] = useState();
   const [verificationResult, setVerificationResult] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +50,7 @@ const Report = () => {
     } catch (error) {
       console.error("Failed to fetch reports:", error);
       toast.error("Failed to fetch reports. Please try again later.");
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -217,26 +218,27 @@ const Report = () => {
 
   return (
     <>
-      <div className="p-8 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-semibold mb-6 text-gray-800">
+      <div className="p-2 sm:p-8 max-w-4xl mx-auto overflow-x-hidden">
+        <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800">
           Report waste
         </h1>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-8 rounded-2xl shadow-lg mb-12"
+          className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg mb-12"
         >
-          <div className="mb-8">
+          {/* Upload Section */}
+          <div className="mb-6 sm:mb-8">
             <label
               htmlFor="waste-image"
-              className="block text-lg font-medium text-gray-700 mb-2"
+              className="block text-base sm:text-lg font-medium text-gray-700 mb-2"
             >
               Upload Waste Image
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-500 transition-colors duration-300">
+            <div className="mt-1 flex flex-col sm:flex-row justify-center items-center px-4 sm:px-6 pt-4 sm:pt-5 pb-4 sm:pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-500 transition-colors duration-300">
               <div className="space-y-1 text-center">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="flex text-sm text-gray-600">
+                <Upload className="mx-auto h-10 sm:h-12 w-10 sm:w-12 text-gray-400" />
+                <div className="flex text-sm text-gray-600 justify-center">
                   <label
                     htmlFor="waste-image"
                     className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
@@ -260,12 +262,13 @@ const Report = () => {
             </div>
           </div>
 
+          {/* Preview */}
           {preview && (
-            <div className="mt-4 mb-8">
+            <div className="mt-4 mb-6 sm:mb-8 flex justify-center">
               <img
                 src={preview}
                 alt="Waste preview"
-                className="max-w-[300px] h-[271px] rounded-xl shadow-md"
+                className="md:max-w-full max-w-56 sm:max-w-[300px] h-auto rounded-xl shadow-md"
               />
             </div>
           )}
@@ -286,6 +289,7 @@ const Report = () => {
             )}
           </Button>
 
+          {/* Verification Result */}
           {verificationStatus === "success" && verificationResult && (
             <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-8 rounded-r-xl">
               <div className="flex items-center">
@@ -296,7 +300,15 @@ const Report = () => {
                   </h3>
                   <div className="mt-2 text-sm text-green-700">
                     <p>Waste Type: {verificationResult.wasteType}</p>
-                    <p>Quantity: {verificationResult.quantity}</p>
+                    <p>
+                      Quantity:{" "}
+                      {verificationResult.quantity.startsWith("approximately")
+                        ? verificationResult.quantity.replace(
+                            "approximately",
+                            "Approx."
+                          )
+                        : verificationResult.quantity}
+                    </p>
                     <p>
                       Confidence:{" "}
                       {(verificationResult.confidence * 100).toFixed(2)}%
@@ -307,7 +319,8 @@ const Report = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Input Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
             <div>
               <label
                 htmlFor="location"
@@ -315,7 +328,6 @@ const Report = () => {
               >
                 Location
               </label>
-
               <input
                 type="text"
                 id="location"
@@ -341,9 +353,9 @@ const Report = () => {
                 value={newReport.type}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300 bg-gray-100"
-                placeholder="Verified waste type"
                 readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-100 focus:outline-none"
+                placeholder="Verified waste type"
               />
             </div>
             <div>
@@ -357,15 +369,20 @@ const Report = () => {
                 type="text"
                 id="amount"
                 name="amount"
-                value={newReport.amount}
+                value={
+                  newReport.amount.startsWith("approximately")
+                    ? newReport.amount.replace("approximately", "Approx.")
+                    : newReport.amount
+                }
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300 bg-gray-100"
-                placeholder="Verified amount"
                 readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-100 focus:outline-none"
+                placeholder="Verified amount"
               />
             </div>
           </div>
+
           <Button
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg rounded-xl transition-colors duration-300 flex items-center justify-center"
@@ -382,34 +399,35 @@ const Report = () => {
           </Button>
         </form>
 
-        <h2 className="text-3xl font-semibold mb-6 text-gray-800">
+        {/* Reports Table */}
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800">
           Recent Reports
         </h2>
         {loading ? (
-          <div className="w-full flex justify-center" >
+          <div className="w-full flex justify-center">
             <Loader className="animate-spin ml-1 mr-3 h-10 w-10 text-green-500" />
           </div>
         ) : reports.length > 0 && reports[0].id ? (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="max-h-96 overflow-y-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 sticky top-0">
+            <div className="max-h-[400px] overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Location
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 text-xs sm:text-sm">
                   {reports.map(
                     (report) =>
                       report.id && (
@@ -417,21 +435,22 @@ const Report = () => {
                           key={report.id}
                           className="hover:bg-gray-50 transition-colors duration-200"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
-                            {report.location.length > 15
-                              ? report.location.slice(0, 15) + "..."
-                              : report.location}
+                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[150px] truncate">
+                            <div className="flex items-center">
+                              <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
+                              {report.location}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {report.wasteType.length > 15
-                              ? report.wasteType.slice(0, 15) + "..."
-                              : report.wasteType}
+                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[120px] truncate">
+                            {report.wasteType}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {report.amount}
+                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[100px] truncate">
+                            {report.amount.replace(
+                              new RegExp("approximately", "i"),
+                              "Approx."
+                            )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-2 sm:px-4 py-4 whitespace-nowrap text-gray-500 max-w-[140px] truncate">
                             {report.createdAt}
                           </td>
                         </tr>
